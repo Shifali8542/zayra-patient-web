@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-teal: #00C2B2;
+    --color-navy: #0D1B2A;
+    --color-mint: #E0F7F5;
+    --color-accent: #00B4A6;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    @apply font-sans antialiased;
+    background: linear-gradient(160deg, #D6F3F0 0%, #C8EEE9 30%, #D8F2EF 60%, #E4F7F5 100%);
+    min-height: 100vh;
+  }
+
+  html.dark body {
+    background: linear-gradient(160deg, #0D1B2A 0%, #0F2235 50%, #0D1B2A 100%);
+  }
+
+  input, textarea, select { @apply outline-none; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-zayra-teal/30 rounded-full; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-zayra-navy text-white font-semibold py-3 px-7 rounded-full
+           flex items-center justify-center gap-2 transition-all duration-200
+           hover:opacity-90 active:scale-95 cursor-pointer whitespace-nowrap;
+  }
+
+  .btn-teal {
+    @apply bg-zayra-teal text-white font-semibold py-3 px-6 rounded-2xl
+           flex items-center justify-center gap-2 transition-all duration-200
+           hover:bg-zayra-accent active:scale-95 cursor-pointer;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl border border-gray-100;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .card {
+    @apply bg-zayra-navy-mid/80 border-white/10;
+  }
+
+  .phone-frame {
+    @apply bg-white rounded-[2.5rem] overflow-hidden;
+    box-shadow: 0 20px 60px rgba(0, 194, 178, 0.15), 0 8px 30px rgba(0,0,0,0.10);
+    border: 2px solid rgba(255,255,255,0.9);
+  }
+
+  .nav-item {
+    @apply flex flex-col items-center gap-0.5 text-xs font-medium
+           text-gray-400 hover:text-zayra-teal transition-colors cursor-pointer;
+  }
+  .nav-item.active { @apply text-zayra-teal; }
+
+  .tag-chip {
+    @apply border border-gray-200 text-gray-700 text-sm font-medium py-2 px-4
+           rounded-full hover:border-zayra-teal hover:text-zayra-teal hover:bg-zayra-mint/30
+           transition-all cursor-pointer select-none;
+  }
+  .tag-chip.selected { @apply border-zayra-teal text-zayra-teal bg-zayra-mint/40; }
+
+  @keyframes drawLine { to { stroke-dashoffset: 0; } }
+  .progress-bar { @apply h-0.5 bg-gradient-to-r from-zayra-teal to-zayra-accent rounded-full; }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}
