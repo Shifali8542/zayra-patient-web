@@ -1,3 +1,8 @@
+// =============================================================================
+// src/pages/Signup/Signup.tsx
+// Real backend auth.
+// =============================================================================
+
 import React, { useState } from 'react'
 import { ArrowRight, Eye, EyeOff, Moon, Sun } from 'lucide-react'
 import { ZayraLogo } from '../../components/ui/ZayraLogo'
@@ -9,7 +14,7 @@ interface SignupPageProps {
 }
 
 export function SignupPage({ onNavigateLogin }: SignupPageProps) {
-  const { signup, loading, error } = useAuth()
+  const { signup, loading, error, clearError } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -18,7 +23,7 @@ export function SignupPage({ onNavigateLogin }: SignupPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await signup(name, email, password)
+    await signup(name.trim(), email.trim().toLowerCase(), password)
   }
 
   return (
@@ -52,28 +57,37 @@ export function SignupPage({ onNavigateLogin }: SignupPageProps) {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {[
-              { label: 'First name', type: 'text', val: name, set: setName, ph: 'Your first name' },
-              { label: 'Email', type: 'email', val: email, set: setEmail, ph: 'you@example.com' },
-            ].map(field => (
-              <div key={field.label}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{field.label}</label>
-                <input
-                  type={field.type} value={field.val}
-                  onChange={e => field.set(e.target.value)} placeholder={field.ph} required
-                  className="w-full px-4 py-3.5 rounded-2xl border border-white/80 bg-white/70 dark:bg-zayra-navy-mid/50
-                             text-gray-900 dark:text-white placeholder-gray-400 focus:border-zayra-teal
-                             focus:ring-2 focus:ring-zayra-teal/20 transition-all"
-                />
-              </div>
-            ))}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">First name</label>
+              <input
+                type="text" value={name}
+                onChange={e => { setName(e.target.value); clearError() }}
+                placeholder="Your first name" required
+                className="w-full px-4 py-3.5 rounded-2xl border border-white/80 bg-white/70 dark:bg-zayra-navy-mid/50
+                           text-gray-900 dark:text-white placeholder-gray-400 focus:border-zayra-teal
+                           focus:ring-2 focus:ring-zayra-teal/20 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
+              <input
+                type="email" value={email}
+                onChange={e => { setEmail(e.target.value); clearError() }}
+                placeholder="you@example.com" required
+                className="w-full px-4 py-3.5 rounded-2xl border border-white/80 bg-white/70 dark:bg-zayra-navy-mid/50
+                           text-gray-900 dark:text-white placeholder-gray-400 focus:border-zayra-teal
+                           focus:ring-2 focus:ring-zayra-teal/20 transition-all"
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'} value={password}
-                  onChange={e => setPassword(e.target.value)} placeholder="Min. 8 characters" minLength={8} required
+                  onChange={e => { setPassword(e.target.value); clearError() }}
+                  placeholder="Min. 5 characters" minLength={5} required
                   className="w-full px-4 py-3.5 rounded-2xl border border-white/80 bg-white/70 dark:bg-zayra-navy-mid/50
                              text-gray-900 dark:text-white placeholder-gray-400 focus:border-zayra-teal
                              focus:ring-2 focus:ring-zayra-teal/20 transition-all pr-12"

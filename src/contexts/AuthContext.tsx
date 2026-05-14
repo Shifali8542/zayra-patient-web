@@ -1,52 +1,104 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react'
-import type { User } from '../types'
-import { mockUser } from '../mocks/mockData'
+// =============================================================================
+// src/contexts/AuthContext.tsx
+// Real backend authentication. Zero mock imports.
+// =============================================================================
+
+import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
+import type { User, AuthTokens } from '../types'
+import { api, setTokens, setRefreshFailedCallback } from '../services/api'
 
 interface AuthContextType {
   isAuthenticated: boolean
   user: User | null
+  tokens: AuthTokens | null
   login: (email: string, password: string) => Promise<void>
   signup: (name: string, email: string, password: string) => Promise<void>
-  logout: () => void
-  skipAuth: () => void
+  logout: () => Promise<void>
+  loading: boolean
+  error: string | null
+  clearError: () => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [tokens, setTokensState] = useState<AuthTokens | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const login = async (email: string, _password: string) => {
-    await new Promise(r => setTimeout(r, 800))
-    setUser({ ...mockUser, email })
-    setIsAuthenticated(true)
-  }
+  // Register forced-logout callback for expired refresh tokens
+  useEffect(() => {
+    setRefreshFailedCallback(() => {
+      setUser(null)
+      setTokensState(null)
+      setIsAuthenticated(false)
+      setTokens(null)
+    })
+  }, [])
 
-  const signup = async (name: string, email: string, _password: string) => {
-    await new Promise(r => setTimeout(r, 800))
-    setUser({ ...mockUser, name, email })
-    setIsAuthenticated(true)
-  }
+  const clearError = useCallback(() => setError(null), [])
 
-  const logout = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-  }
+  const login = useCallback(async (email: string, password: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { user: u, tokens: t } = await api.auth.login(email, password)
+      setUser(u)
+      setTokensState(t)
+      setIsAuthenticated(true)
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Invalid credentials. Please try again.'
+      setError(msg)
+      throw e
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-  const skipAuth = () => {
-    setUser(mockUser)
-    setIsAuthenticated(true)
-  }
+  const signup = useCallback(async (name: string, email: string, password: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { user: u, tokens: t } = await api.auth.register(name, email, password)
+      setUser(u)
+      setTokensState(t)
+      setIsAuthenticated(true)
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not create account. Please try again.'
+      setError(msg)
+      throw e
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const logout = useCallback(async () => {
+    setLoading(true)
+    try {
+      await api.auth.logout()
+    } finally {
+      setUser(null)
+      setTokensState(null)
+      setIsAuthenticated(false)
+      setTokens(null)
+      setLoading(false)
+    }
+  }, [])
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, signup, logout, skipAuth }}>
+    <AuthContext.Provider value={{
+      isAuthenticated, user, tokens,
+      login, signup, logout,
+      loading, error, clearError,
+    }}>
       {children}
     </AuthContext.Provider>
   )
 }
 
-export function useAuthContext() {
+export function useAuthContext(): AuthContextType {
   const ctx = useContext(AuthContext)
   if (!ctx) throw new Error('useAuthContext must be used within AuthProvider')
   return ctx

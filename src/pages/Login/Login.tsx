@@ -1,3 +1,8 @@
+// =============================================================================
+// src/pages/Login/Login.tsx
+// Real backend auth. Removed skipAuth mock shortcut.
+// =============================================================================
+
 import React, { useState } from 'react'
 import { ArrowRight, Eye, EyeOff, Moon, Sun } from 'lucide-react'
 import { ZayraLogo } from '../../components/ui/ZayraLogo'
@@ -9,7 +14,7 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onNavigateSignup }: LoginPageProps) {
-  const { login, skipAuth, loading, error } = useAuth()
+  const { login, loading, error, clearError } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,7 +22,7 @@ export function LoginPage({ onNavigateSignup }: LoginPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await login(email, password)
+    await login(email.trim().toLowerCase(), password)
   }
 
   return (
@@ -55,7 +60,8 @@ export function LoginPage({ onNavigateSignup }: LoginPageProps) {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email</label>
               <input
-                type="email" value={email} onChange={e => setEmail(e.target.value)}
+                type="email" value={email}
+                onChange={e => { setEmail(e.target.value); clearError() }}
                 placeholder="you@example.com" required
                 className="w-full px-4 py-3.5 rounded-2xl border border-white/80 bg-white/70 dark:bg-zayra-navy-mid/50
                            text-gray-900 dark:text-white placeholder-gray-400 focus:border-zayra-teal
@@ -68,7 +74,8 @@ export function LoginPage({ onNavigateSignup }: LoginPageProps) {
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'} value={password}
-                  onChange={e => setPassword(e.target.value)} placeholder="••••••••" required
+                  onChange={e => { setPassword(e.target.value); clearError() }}
+                  placeholder="••••••••" required
                   className="w-full px-4 py-3.5 rounded-2xl border border-white/80 bg-white/70 dark:bg-zayra-navy-mid/50
                              text-gray-900 dark:text-white placeholder-gray-400 focus:border-zayra-teal
                              focus:ring-2 focus:ring-zayra-teal/20 transition-all pr-12"
@@ -88,13 +95,6 @@ export function LoginPage({ onNavigateSignup }: LoginPageProps) {
               {loading
                 ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 : <><span>Sign in</span><ArrowRight size={18} /></>}
-            </button>
-
-            {/* Skip for now */}
-            <button type="button" onClick={skipAuth}
-                    className="w-full py-3 text-sm font-medium text-gray-500 hover:text-zayra-teal
-                               border border-white/60 bg-white/40 hover:bg-white/60 rounded-full transition-all">
-              Skip for now →
             </button>
           </form>
 

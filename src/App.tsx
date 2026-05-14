@@ -1,3 +1,7 @@
+// =============================================================================
+// src/App.tsx
+// =============================================================================
+
 import React, { useState } from 'react'
 import { AuthProvider, useAuthContext } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -5,7 +9,7 @@ import { LoginPage } from './pages/Login/Login'
 import { SignupPage } from './pages/Signup/Signup'
 import { DashboardPage } from './pages/Dashboard/Dashboard'
 
-type Route = 'login' | 'signup' | 'dashboard'
+type Route = 'login' | 'signup'
 
 function AppRoutes() {
   const { isAuthenticated, user, logout } = useAuthContext()
@@ -15,8 +19,8 @@ function AppRoutes() {
     return (
       <DashboardPage
         user={user}
-        onLogout={() => {
-          logout()
+        onLogout={async () => {
+          await logout()
           setRoute('login')
         }}
       />
@@ -27,9 +31,7 @@ function AppRoutes() {
     return <SignupPage onNavigateLogin={() => setRoute('login')} />
   }
 
-  return (
-    <LoginPage onNavigateSignup={() => setRoute('signup')} />
-  )
+  return <LoginPage onNavigateSignup={() => setRoute('signup')} />
 }
 
 export default function App() {
