@@ -138,6 +138,31 @@ export function useSupportChat(ticketId: number, accessToken: string | null) {
     }
   }, [accessToken, buildWsUrl, appendMessage])
 
+  // ── Poll for new messages — catches REST-originated agent replies ──────────
+  // WebSocket handles messages sent via WS instantly (patient → agent path).
+  // Agent replies come via REST (support web has no WebSocket) → poll bridges the gap.
+  // 5s cadence: fast enough to feel live, light enough to not hammer the server.
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const pollMessages = useCallback(async () => {
+    if (!isMounted.current) return
+    try {
+      const latest = await api.support.getMessages(ticketId)
+      if (!isMounted.current) return
+      setState(prev => {
+        // Only update if there are genuinely new messages
+        if (latest.length === prev.messages.length) return prev
+        // Merge: keep messages already in state, append any truly new ones
+        const existingIds = new Set(prev.messages.map(m => m.id))
+        const newOnes = latest.filter(m => !existingIds.has(m.id))
+        if (newOnes.length === 0) return prev
+        return { ...prev, messages: [...prev.messages, ...newOnes] }
+      })
+    } catch {
+      // Swallow poll errors silently — WS is still the primary channel
+    }
+  }, [ticketId])
+
   // ── Single mount effect — load history then open WS ────────────────────────
   useEffect(() => {
     isMounted.current = true
@@ -145,9 +170,16 @@ export function useSupportChat(ticketId: number, accessToken: string | null) {
     loadHistory()
     connectWs()
 
+    // Poll every 5 seconds to catch REST-originated agent replies
+    pollRef.current = setInterval(pollMessages, 5000)
+
     return () => {
       isMounted.current = false
 
+      if (pollRef.current) {
+        clearInterval(pollRef.current)
+        pollRef.current = null
+      }
       if (retryTimer.current) {
         clearTimeout(retryTimer.current)
         retryTimer.current = null
@@ -160,7 +192,6 @@ export function useSupportChat(ticketId: number, accessToken: string | null) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketId, accessToken])   // re-run only if ticket or token changes
-
   // ── Send a message ─────────────────────────────────────────────────────────
   const sendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim()
