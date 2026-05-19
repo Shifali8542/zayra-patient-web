@@ -103,55 +103,64 @@ export function useDashboard() {
     setState(prev => ({ ...prev, loading: true, error: null, noPatientProfile: false }))
 
     try {
-      // 1. Patient profile
+      // ── Step 1: Patient profile first — needed to get the record ID ─────────
+      // This is fast (just a DB lookup). Show the app immediately after this.
       const patientMe = await api.patient.getMe()
-      const firstId = patientMe.ecg_records[0]?.id
+      const firstId   = patientMe.ecg_records[0]?.id
 
-      // 2. Clinical info (ECG metrics) — swallow errors, show what we can
-      const clinicalInfo = await api.patient
-        .getClinicalInfo(firstId)
-        .catch(() => null)
-
-      // 3. AI analysis — 404 = not run yet, not an error
-      const aiAnalysis = await api.assessments
-        .getAIAnalysis({ recordId: firstId })
-        .catch(e => {
-          if (e instanceof ApiError && e.status === 404) return null
-          throw e
-        })
-
-      // 4. ST result — 404 = not run yet
-      const stResult = await api.assessments.getSTResult(firstId)
-
-      // Derive all app-level types from raw backend data
-      const metrics = deriveHealthMetric(clinicalInfo, aiAnalysis?.analysis?.risk_level ?? null)
-      const timeline = deriveTimeline(aiAnalysis, stResult)
-      const streak = deriveRhythmStreak(patientMe.record_count)
-      const alynaChat = deriveAlynaInitialChat(aiAnalysis)
-      const consistencyAreas = deriveConsistencyAreas(clinicalInfo)
-
+      // Render the patient name and streak immediately — do not wait for ECG data
       setState(prev => ({
         ...prev,
         patientMe,
+        streak:  deriveRhythmStreak(patientMe.record_count),
+        loading: false,   // ← unblock the UI now, heavy data loads behind the scenes
+        noPatientProfile: false,
+      }))
+
+      // ── Step 2: Run all three heavy calls in parallel ─────────────────────
+      // clinicalInfo, aiAnalysis, stResult are completely independent of each
+      // other — there is no reason to await them sequentially.
+      // Total wait time = slowest of the three, not the sum of all three.
+      const [clinicalInfo, aiAnalysis, stResult] = await Promise.all([
+
+        api.patient.getClinicalInfo(firstId)
+          .catch(() => null),
+
+        api.assessments.getAIAnalysis({ recordId: firstId })
+          .catch((e: unknown) => {
+            if (e instanceof ApiError && e.status === 404) return null
+            return null   // swallow all AI errors — app works without AI data
+          }),
+
+        api.assessments.getSTResult(firstId)
+          .catch(() => null),
+
+      ])
+
+      // Derive once all three are ready
+      const metrics          = deriveHealthMetric(clinicalInfo, aiAnalysis?.analysis?.risk_level ?? null)
+      const timeline         = deriveTimeline(aiAnalysis, stResult)
+      const alynaChat        = deriveAlynaInitialChat(aiAnalysis)
+      const consistencyAreas = deriveConsistencyAreas(clinicalInfo)
+
+      // Update state with the full data — patient is already seeing the screen
+      setState(prev => ({
+        ...prev,
         clinicalInfo,
         aiAnalysis,
         stResult,
         metrics,
         timeline,
-        streak,
         alynaChat,
         consistencyAreas,
-        interpretation: aiAnalysis?.analysis?.narrative ?? null,
-        riskLevel: aiAnalysis?.analysis?.risk_level ?? null,
-        findings: aiAnalysis?.analysis?.findings ?? [],
-        recommendation: aiAnalysis?.analysis?.recommendation ?? null,
-        loading: false,
-        error: null,
-        noPatientProfile: false,
+        interpretation:  aiAnalysis?.analysis?.narrative     ?? null,
+        riskLevel:       aiAnalysis?.analysis?.risk_level    ?? null,
+        findings:        aiAnalysis?.analysis?.findings      ?? [],
+        recommendation:  aiAnalysis?.analysis?.recommendation ?? null,
       }))
+
     } catch (e: unknown) {
       if (e instanceof ApiError && e.status === 403) {
-        // Patient account exists but has no linked ECG profile yet
         setState(prev => ({ ...prev, loading: false, error: null, noPatientProfile: true }))
         return
       }
@@ -164,7 +173,7 @@ export function useDashboard() {
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  // ── Per-record waveform — cached per record_id ─────────────────────────────
+  // ── Per-record waveform
 
   const getWaveform = useCallback(async (recordId: number): Promise<WaveformData | null> => {
     if (waveformCache.current[recordId]) {

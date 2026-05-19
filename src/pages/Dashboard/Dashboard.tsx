@@ -27,8 +27,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const { tokens } = useAuthContext()
 
   const renderTab = () => {
-    // Loading state — only block rendering if core data hasn't arrived yet
-    if (dashboard.loading) return null
+    if (dashboard.loading && !dashboard.patientMe) return null
 
     // No patient profile linked to this account
     if (dashboard.noPatientProfile) {
