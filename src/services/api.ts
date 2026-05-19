@@ -1,10 +1,3 @@
-// =============================================================================
-// src/services/api.ts
-// Production API client. Zero mock data. Zero delay().
-// All HTTP, token management, and data derivation lives here.
-// Mirror of the mobile app's api.ts, adapted for web (Vite/React).
-// =============================================================================
-
 import type {
   User,
   BackendUser,
@@ -20,7 +13,11 @@ import type {
   HealthMetric,
   TimelineEvent,
   RhythmStreak,
-  ChatMessage,
+  ChatMessage, PaginatedTickets,
+  SupportTicketDetail,
+  SupportMessage,
+  CreateTicketPayload,
+  CsatPayload,
 } from '../types'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -429,13 +426,10 @@ export const api = {
     },
   },
 
-  // ── Assessments ─────────────────────────────────────────────────────────────
+  // ── Assessments
 
   assessments: {
-    /**
-     * GET /api/v1/assessments/me/ai-analysis/?record_id=&refresh=true
-     * Returns cached Orinn result. 404 = analysis not run yet.
-     */
+
     getAIAnalysis: async (params?: {
       recordId?: number
       refresh?: boolean
@@ -447,11 +441,7 @@ export const api = {
       return request<AIAnalysisResponse>(`/api/v1/assessments/me/ai-analysis/${qs}`)
     },
 
-    /**
-     * GET /api/v1/assessments/st-elevation/me/?record_id=
-     * 404 = not yet run → returns null.
-     */
-    getSTResult: async (recordId?: number): Promise<PatientSTResult | null> => {
+   getSTResult: async (recordId?: number): Promise<PatientSTResult | null> => {
       const qs = recordId ? `?record_id=${recordId}` : ''
       try {
         return await request<PatientSTResult>(`/api/v1/assessments/st-elevation/me/${qs}`)
@@ -460,5 +450,39 @@ export const api = {
         throw e
       }
     },
+  },
+
+  // ── Customer Support
+
+  support: {
+    getMyTickets: async (status?: string): Promise<PaginatedTickets> => {
+      const qs = status ? `?status=${status}` : ''
+      return request<PaginatedTickets>(`/api/v1/support/tickets/mine/${qs}`)
+    },
+
+    getTicketDetail: async (ticketId: number): Promise<SupportTicketDetail> =>
+      request<SupportTicketDetail>(`/api/v1/support/tickets/${ticketId}/`),
+
+    createTicket: async (payload: CreateTicketPayload): Promise<SupportTicketDetail> =>
+      request<SupportTicketDetail>('/api/v1/support/tickets/', {
+        method: 'POST',
+        body: payload,
+      }),
+
+    getMessages: async (ticketId: number): Promise<SupportMessage[]> =>
+      request<SupportMessage[]>(`/api/v1/support/tickets/${ticketId}/messages/`),
+
+    sendMessage: async (ticketId: number, message: string): Promise<SupportMessage> =>
+      request<SupportMessage>(`/api/v1/support/tickets/${ticketId}/messages/`, {
+        method: 'POST',
+        body: { message },
+      }),
+
+
+    submitCsat: async (ticketId: number, payload: CsatPayload): Promise<void> =>
+      request<void>(`/api/v1/support/tickets/${ticketId}/csat/`, {
+        method: 'POST',
+        body: payload,
+      }),
   },
 }

@@ -1,10 +1,5 @@
-// =============================================================================
-// src/pages/Dashboard/ProfileTab.tsx
-// Baseline line built from real ecg_analysis data. No mock baseline object.
-// =============================================================================
-
 import React from 'react'
-import { ChevronRight, Shield, Users, FileText, Cpu, LogOut } from 'lucide-react'
+import { ChevronRight, Shield, Users, FileText, Cpu, LogOut, LifeBuoy } from 'lucide-react'
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 import type { User, ClinicalInfo } from '../../types'
@@ -13,9 +8,10 @@ interface ProfileTabProps {
   user: User
   onLogout: () => Promise<void>
   clinicalInfo: ClinicalInfo | null
+  onNavigateSupport?: () => void
 }
 
-export function ProfileTab({ user, onLogout, clinicalInfo }: ProfileTabProps) {
+export function ProfileTab({ user, onLogout, clinicalInfo, onNavigateSupport }: ProfileTabProps) {
   const { theme, toggleTheme } = useTheme()
   const ecg = clinicalInfo?.ecg_analysis
 
@@ -24,7 +20,7 @@ export function ProfileTab({ user, onLogout, clinicalInfo }: ProfileTabProps) {
     ? `${Math.round(ecg.heart_rate_bpm)} bpm HR · ${ecg.hrv_ms != null ? `${Math.round(ecg.hrv_ms)} ms HRV` : '—'} · ${ecg.rhythm ?? '—'}`
     : 'Baseline not yet available'
 
-  const menuItems = [
+  const menuItems: { icon: React.ReactNode; label: string; sub: string; onPress?: () => void }[] = [
     {
       icon: <div className="w-8 h-8 rounded-full bg-zayra-teal flex items-center justify-center text-white font-bold text-sm">
               {(user.first_name?.[0] ?? user.name?.[0] ?? '?').toUpperCase()}
@@ -36,6 +32,7 @@ export function ProfileTab({ user, onLogout, clinicalInfo }: ProfileTabProps) {
     { icon: <Shield size={18} className="text-zayra-navy dark:text-white" />, label: 'Privacy Center', sub: 'What Zayra sees · what others see' },
     { icon: <Users size={18} className="text-zayra-navy dark:text-white" />, label: 'Family & Circle', sub: 'Sharing & emergency awareness' },
     { icon: <FileText size={18} className="text-zayra-navy dark:text-white" />, label: 'Reports', sub: 'Clinician-ready PDFs' },
+    { icon: <LifeBuoy size={18} className="text-zayra-teal" />, label: 'Help & Support', sub: 'Contact our support team', onPress: onNavigateSupport },
   ]
 
   return (
@@ -62,7 +59,7 @@ export function ProfileTab({ user, onLogout, clinicalInfo }: ProfileTabProps) {
       {/* Menu Items */}
       <div className="space-y-2">
         {menuItems.map((item, i) => (
-          <div key={i} className="card px-4 py-3 flex items-center gap-3 cursor-pointer hover:shadow-zayra transition-shadow">
+          <div key={i} onClick={item.onPress} className="card px-4 py-3 flex items-center gap-3 cursor-pointer hover:shadow-zayra transition-shadow">
             <div className="w-10 h-10 rounded-full bg-gray-50 dark:bg-zayra-navy flex items-center justify-center flex-shrink-0">
               {item.icon}
             </div>

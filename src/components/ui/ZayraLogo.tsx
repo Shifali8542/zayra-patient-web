@@ -16,8 +16,6 @@ export function ZayraLogo({ size = 190, showText = true, className = '' }: Zayra
         style={{ width: size, height: size }}
         className="rounded-full flex-shrink-0 object-contain"
       />
-
-      {/* ✅ FIXED: Bold, large text matching Image 1 */}
       {showText && (
         <span
           className="font-display font-bold text-zayra-navy dark:text-white"

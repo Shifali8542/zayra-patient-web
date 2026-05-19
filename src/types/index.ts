@@ -303,3 +303,85 @@ export interface Story {
   tag: string
   tagColor: string
 }
+
+// Customer Support 
+export type TicketStatus = 'open' | 'in_progress' | 'escalated' | 'resolved' | 'closed'
+export type TicketSeverity = 'critical' | 'urgent' | 'normal' | 'resolved'
+export type TicketCategory =
+  | 'device_sync'
+  | 'alyna_alert'
+  | 'billing'
+  | 'onboarding'
+  | 'evac_alert'
+  | 'other'
+
+/** One message in a ticket thread  */
+export interface SupportMessage {
+  id: number
+  sender: string
+  text: string
+  time: string
+  sent_at: string
+  mine: boolean
+  sender_type: 'customer' | 'agent' | 'system'
+}
+
+/** Compact ticket shape  */
+export interface SupportTicket {
+  id: number
+  ticket_number: string
+  title: string
+  severity: TicketSeverity
+  status: TicketStatus
+  category: TicketCategory
+  user_name: string
+  user_plan: string
+  tags: string[]
+  time_ago: string
+  message_count: number
+  assigned_to: { id: number; name: string } | null
+  created_at: string
+}
+
+/** Full ticket detail  */
+export interface SupportTicketDetail extends SupportTicket {
+  description: string
+  user_email: string | null
+  member_since: string | null
+  clinician: string | null
+  note: string | null
+  messages: SupportMessage[]
+  updated_at: string
+  resolved_at: string | null
+}
+
+/** Paginated list wrapper */
+export interface PaginatedTickets {
+  count: number
+  next: string | null
+  previous: string | null
+  results: SupportTicket[]
+}
+
+export interface CreateTicketPayload extends Record<string, unknown> {
+  title: string
+  description: string
+  category: TicketCategory
+}
+
+export interface CsatPayload extends Record<string, unknown> {
+  score: number
+  comment?: string
+}
+
+/** Real-time WebSocket message received from the server */
+export interface WsChatMessage {
+  type: 'chat_message'
+  id: number
+  sender: string
+  sender_type: 'customer' | 'agent' | 'system'
+  text: string
+  time: string
+  sent_at: string
+  mine: boolean
+}

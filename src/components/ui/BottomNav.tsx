@@ -1,10 +1,5 @@
-// =============================================================================
-// src/components/ui/BottomNav.tsx
-// ECG tab added to match the mobile app's tab order.
-// =============================================================================
-
 import React from 'react'
-import { Home, Heart, Sparkles, Users, Flame, BookOpen, User } from 'lucide-react'
+import { Home, Heart, Sparkles, Users, Flame, BookOpen, User, LifeBuoy } from 'lucide-react'
 
 interface BottomNavProps {
   active: string
@@ -18,6 +13,7 @@ const navItems = [
   { id: 'rhythm',  label: 'Rhythm',  Icon: Flame },
   { id: 'circle',  label: 'Circle',  Icon: Users },
   { id: 'stories', label: 'Stories', Icon: BookOpen },
+  { id: 'support', label: 'Support', Icon: LifeBuoy },
   { id: 'profile', label: 'Profile', Icon: User },
 ]
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useDashboard } from '../../hooks/useDashboard'
+import { useAuthContext } from '../../contexts/AuthContext'
 import { BottomNav } from '../../components/ui/BottomNav'
 import { ZayraLogo } from '../../components/ui/ZayraLogo'
 import { HomeTab } from './HomeTab'
@@ -10,6 +11,8 @@ import { RhythmTab } from './RhythmTab'
 import { StoriesTab } from './StoriesTab'
 import { ProfileTab } from './ProfileTab'
 import { Navbar } from '../../components/layout/Navbar'
+import { SupportScreen } from '../Support/SupportScreen'
+import { TicketChatScreen } from '../Support/TicketChatScreen'
 import type { User } from '../../types'
 
 interface DashboardPageProps {
@@ -19,7 +22,9 @@ interface DashboardPageProps {
 
 export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [activeTab, setActiveTab] = useState('home')
+  const [openTicketId, setOpenTicketId] = useState<number | null>(null)
   const dashboard = useDashboard()
+  const { tokens } = useAuthContext()
 
   const renderTab = () => {
     // Loading state — only block rendering if core data hasn't arrived yet
@@ -100,8 +105,28 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
           : null
       case 'stories':
         return <StoriesTab stories={dashboard.stories} />
+      case 'support':
+        if (openTicketId !== null) {
+          return (
+            <TicketChatScreen
+              ticketId={openTicketId}
+              accessToken={tokens?.access ?? null}
+              onBack={() => setOpenTicketId(null)}
+            />
+          )
+        }
+        return (
+          <SupportScreen onOpenTicket={(id) => setOpenTicketId(id)} />
+        )
       case 'profile':
-        return <ProfileTab user={user} onLogout={onLogout} clinicalInfo={dashboard.clinicalInfo} />
+        return (
+          <ProfileTab
+            user={user}
+            onLogout={onLogout}
+            clinicalInfo={dashboard.clinicalInfo}
+            onNavigateSupport={() => setActiveTab('support')}
+          />
+        )
       default:
         return null
     }
@@ -214,7 +239,13 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
             </div>
 
             {/* Bottom nav */}
-            <BottomNav active={activeTab} onNavigate={setActiveTab} />
+            <BottomNav
+              active={activeTab}
+              onNavigate={(tab) => {
+                if (tab !== 'support') setOpenTicketId(null)
+                setActiveTab(tab)
+              }}
+            />
           </div>
         </div>
       </div>
