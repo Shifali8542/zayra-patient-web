@@ -38,8 +38,6 @@ import type {
   ClinicalInfo,
   AIAnalysisResponse,
   PatientSTResult,
-  WaveformData,
-  HeartReport,
   CircleMember,
   Journey,
   Story,
@@ -95,32 +93,22 @@ export function useDashboard() {
     noPatientProfile: false,
   })
 
-  // Per-record caches — survive tab switches, cleared on logout
-  const waveformCache = useRef<Record<number, WaveformData>>({})
-  const heartReportCache = useRef<Record<number, HeartReport>>({})
-
   const loadAll = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null, noPatientProfile: false }))
 
     try {
-      // ── Step 1: Patient profile first — needed to get the record ID ─────────
-      // This is fast (just a DB lookup). Show the app immediately after this.
+      // ── Step 1: Patient profile first
       const patientMe = await api.patient.getMe()
-      const firstId   = patientMe.ecg_records[0]?.id
-
-      // Render the patient name and streak immediately — do not wait for ECG data
+      const firstId = patientMe.ecg_records[0]?.id
       setState(prev => ({
         ...prev,
         patientMe,
-        streak:  deriveRhythmStreak(patientMe.record_count),
-        loading: false,   // ← unblock the UI now, heavy data loads behind the scenes
+        streak: deriveRhythmStreak(patientMe.record_count),
+        loading: false,
         noPatientProfile: false,
       }))
 
-      // ── Step 2: Run all three heavy calls in parallel ─────────────────────
-      // clinicalInfo, aiAnalysis, stResult are completely independent of each
-      // other — there is no reason to await them sequentially.
-      // Total wait time = slowest of the three, not the sum of all three.
+      // ── Step 2: Run all three heavy calls in parallel
       const [clinicalInfo, aiAnalysis, stResult] = await Promise.all([
 
         api.patient.getClinicalInfo(firstId)
@@ -138,9 +126,9 @@ export function useDashboard() {
       ])
 
       // Derive once all three are ready
-      const metrics          = deriveHealthMetric(clinicalInfo, aiAnalysis?.analysis?.risk_level ?? null)
-      const timeline         = deriveTimeline(aiAnalysis, stResult)
-      const alynaChat        = deriveAlynaInitialChat(aiAnalysis)
+      const metrics = deriveHealthMetric(clinicalInfo, aiAnalysis?.analysis?.risk_level ?? null)
+      const timeline = deriveTimeline(aiAnalysis, stResult)
+      const alynaChat = deriveAlynaInitialChat(aiAnalysis)
       const consistencyAreas = deriveConsistencyAreas(clinicalInfo)
 
       // Update state with the full data — patient is already seeing the screen
@@ -153,10 +141,10 @@ export function useDashboard() {
         timeline,
         alynaChat,
         consistencyAreas,
-        interpretation:  aiAnalysis?.analysis?.narrative     ?? null,
-        riskLevel:       aiAnalysis?.analysis?.risk_level    ?? null,
-        findings:        aiAnalysis?.analysis?.findings      ?? [],
-        recommendation:  aiAnalysis?.analysis?.recommendation ?? null,
+        interpretation: aiAnalysis?.analysis?.narrative ?? null,
+        riskLevel: aiAnalysis?.analysis?.risk_level ?? null,
+        findings: aiAnalysis?.analysis?.findings ?? [],
+        recommendation: aiAnalysis?.analysis?.recommendation ?? null,
       }))
 
     } catch (e: unknown) {
@@ -173,38 +161,7 @@ export function useDashboard() {
 
   useEffect(() => { loadAll() }, [loadAll])
 
-  // ── Per-record waveform
-
-  const getWaveform = useCallback(async (recordId: number): Promise<WaveformData | null> => {
-    if (waveformCache.current[recordId]) {
-      return waveformCache.current[recordId]
-    }
-    try {
-      const data = await api.patient.getWaveform({ recordId, downsample: 4 })
-      waveformCache.current[recordId] = data
-      return data
-    } catch {
-      return null
-    }
-  }, [])
-
-  // ── Per-record heart report — cached per record_id ─────────────────────────
-
-  const getHeartReport = useCallback(async (recordId: number): Promise<HeartReport | null> => {
-    if (heartReportCache.current[recordId]) {
-      return heartReportCache.current[recordId]
-    }
-    try {
-      const data = await api.patient.getHeartReport(recordId)
-      heartReportCache.current[recordId] = data
-      return data
-    } catch {
-      return null
-    }
-  }, [])
-
-  // ── Send Alyna message — triggers refresh=true Orinn call ─────────────────
-
+  // Send Alyna message 
   const sendAlynaMessage = useCallback(async (message: string): Promise<ChatMessage> => {
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     try {
@@ -233,10 +190,7 @@ export function useDashboard() {
     }
   }, [state.patientMe])
 
-  const clearCache = useCallback(() => {
-    waveformCache.current = {}
-    heartReportCache.current = {}
-  }, [])
+  const clearCache = useCallback(() => { }, [])
 
-  return { ...state, sendAlynaMessage, getWaveform, getHeartReport, clearCache, reload: loadAll }
+  return { ...state, sendAlynaMessage, clearCache, reload: loadAll }
 }

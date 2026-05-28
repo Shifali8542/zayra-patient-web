@@ -1,11 +1,5 @@
-// =============================================================================
-// src/pages/Dashboard/HomeTab.tsx
-// Real backend data. Metrics: Avg HR, HRV, QRS (ECG-derived, no SpO2).
-// ST emergency alert shown when stemi_suspected = true.
-// =============================================================================
-
 import React from 'react'
-import { ECGChart } from '../../components/ui/ECGChart'
+import { useGreeting } from '../../hooks/useGreeting'
 import type { HealthMetric, TimelineEvent, TimelineEventType, PatientSTResult, User } from '../../types'
 
 interface HomeTabProps {
@@ -31,12 +25,8 @@ function timelineIconColor(type: TimelineEventType) {
   }
 }
 
-function getGreeting(): string {
-  const hour = new Date().getHours()
-  return hour < 12 ? 'GOOD MORNING' : hour < 17 ? 'GOOD AFTERNOON' : 'GOOD EVENING'
-}
-
 export function HomeTab({ user, metrics, timeline, interpretation, stResult }: HomeTabProps) {
+  const greeting = useGreeting()
   const firstName = user.first_name?.toLowerCase() || user.name?.toLowerCase() || ''
 
   return (
@@ -45,7 +35,7 @@ export function HomeTab({ user, metrics, timeline, interpretation, stResult }: H
       {/* Greeting */}
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">{getGreeting()}</p>
+          <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">{greeting}</p>
           <h2 className="font-display font-bold text-2xl text-zayra-navy dark:text-white mt-0.5">
             {firstName}.
           </h2>
@@ -83,8 +73,6 @@ export function HomeTab({ user, metrics, timeline, interpretation, stResult }: H
           {interpretation ?? 'Monitoring your ECG data continuously.'}
         </p>
 
-        <ECGChart height={56} />
-
         <div className="flex items-center justify-around mt-3 pt-3 border-t border-gray-100">
           {/* Avg HR */}
           <div className="text-center">
@@ -92,7 +80,7 @@ export function HomeTab({ user, metrics, timeline, interpretation, stResult }: H
             <p className="text-xs text-gray-400 uppercase tracking-wide">Avg HR</p>
           </div>
           <div className="w-px h-8 bg-gray-100" />
-          {/* HRV — replaces SpO₂ (not from ECG datasets) */}
+          {/* HRV  */}
           <div className="text-center">
             <p className="font-display font-bold text-2xl text-zayra-navy dark:text-white">{fmt(metrics?.hrv_ms)}</p>
             <p className="text-xs text-gray-400 uppercase tracking-wide">HRV ms</p>

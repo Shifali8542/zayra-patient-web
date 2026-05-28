@@ -108,52 +108,7 @@ export interface ClinicalInfo {
   diagnoses: string[]
 }
 
-// ─── Waveform ─────────────────────────────────────────────────────────────────
-
-export interface WaveformSegment {
-  samples: number[]
-  start_sec: number
-  end_sec: number
-}
-
-/** GET /api/v1/patients/me/waveform/ */
-export interface WaveformData {
-  patient_code: string
-  record_id: number
-  record_name: string
-  record_label: string
-  record_index: number
-  total_records: number
-  diagnosis: string | null
-  age: number | null
-  sex: string | null
-  sampling_rate: number
-  effective_sampling_rate: number
-  num_samples: number
-  duration_seconds: number | null
-  channel_names: string[]
-  all_channel_names: string[]
-  units: string[]
-  waveforms: Record<string, number[]>
-  grid: {
-    paper_speed_mm_per_sec: number
-    amplitude_mm_per_mv: number
-    small_box_ms: number
-    large_box_ms: number
-    small_box_mv: number
-    large_box_mv: number
-  }
-  recommended_display_seconds: number
-  segments: {
-    before: WaveformSegment
-    anomaly: WaveformSegment
-    after: WaveformSegment
-  }
-  filtered: boolean
-}
-
-// ─── AI / Assessments ─────────────────────────────────────────────────────────
-
+// AI / Assessments 
 export interface AIAnalysisResult {
   id: number
   risk_level: 'Low' | 'Moderate' | 'High' | 'Critical' | null
@@ -179,45 +134,6 @@ export interface PatientSTResult {
   emergency_alert: boolean
   last_checked: string
 }
-
-// ─── Heart Report ─────────────────────────────────────────────────────────────
-
-export interface HeartReportSTResult {
-  overall_status: string
-  overall_status_note: string
-  stemi_suspected: boolean
-  affected_region: string
-  emergency_alert: boolean
-  confidence_score: number
-  last_checked: string
-}
-
-/** GET /api/v1/patients/me/heart-report/ */
-export interface HeartReport {
-  patient_code: string
-  record_id: number
-  record_name: string
-  record_label: string
-  record_index: number
-  total_records: number
-  dataset_source: string
-  dataset_source_display: string
-  demographics: {
-    age: number | null
-    sex: string | null
-    diagnosis: string | null
-  }
-  diagnoses: string[]
-  ecg_metrics: ECGAnalysis | null
-  metrics_source: 'cache' | 'live' | 'error' | 'none'
-  ai_analysis: AIAnalysisResult | null
-  st_result: HeartReportSTResult | null
-  metrics_available: boolean
-  ai_available: boolean
-  st_available: boolean
-}
-
-// ─── App-level derived types (no backend endpoint, built in api.ts) ───────────
 
 /** Derived from ECGAnalysis + AIAnalysisResult — used by HomeTab */
 export interface HealthMetric {

@@ -4,7 +4,6 @@ import { useAuthContext } from '../../contexts/AuthContext'
 import { BottomNav } from '../../components/ui/BottomNav'
 import { ZayraLogo } from '../../components/ui/ZayraLogo'
 import { HomeTab } from './HomeTab'
-import { ECGTab } from './ECGTab'
 import { AlynaTab } from './AlynaTab'
 import { CircleTab } from './CircleTab'
 import { RhythmTab } from './RhythmTab'
@@ -75,14 +74,6 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
             timeline={dashboard.timeline}
             interpretation={dashboard.interpretation}
             stResult={dashboard.stResult}
-          />
-        )
-      case 'ecg':
-        return (
-          <ECGTab
-            patientMe={dashboard.patientMe}
-            getWaveform={dashboard.getWaveform}
-            getHeartReport={dashboard.getHeartReport}
           />
         )
       case 'alyna':

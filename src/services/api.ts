@@ -6,10 +6,8 @@ import type {
   RegisterResponse,
   PatientMe,
   ClinicalInfo,
-  WaveformData,
   AIAnalysisResponse,
   PatientSTResult,
-  HeartReport,
   HealthMetric,
   TimelineEvent,
   RhythmStreak,
@@ -386,43 +384,15 @@ export const api = {
     },
   },
 
-  // ── Patient ─────────────────────────────────────────────────────────────────
+  // Patient
 
   patient: {
-    /** GET /api/v1/patients/me/ */
     getMe: async (): Promise<PatientMe> =>
       request<PatientMe>('/api/v1/patients/me/'),
 
-    /** GET /api/v1/patients/me/clinical-info/?record_id= */
     getClinicalInfo: async (recordId?: number): Promise<ClinicalInfo> => {
       const qs = recordId ? `?record_id=${recordId}` : ''
       return request<ClinicalInfo>(`/api/v1/patients/me/clinical-info/${qs}`)
-    },
-
-    /**
-     * GET /api/v1/patients/me/waveform/?record_id=&channels=ii&downsample=4
-     * Backend caches filtered signal for 1 hour.
-     */
-    getWaveform: async (params?: {
-      recordId?: number
-      channels?: string
-      downsample?: number
-    }): Promise<WaveformData> => {
-      const qp = new URLSearchParams()
-      if (params?.recordId) qp.set('record_id', String(params.recordId))
-      if (params?.channels) qp.set('channels', params.channels)
-      if (params?.downsample) qp.set('downsample', String(params.downsample))
-      const qs = qp.toString() ? `?${qp.toString()}` : ''
-      return request<WaveformData>(`/api/v1/patients/me/waveform/${qs}`)
-    },
-
-    /**
-     * GET /api/v1/patients/me/heart-report/?record_id=
-     * Merges clinical + AI + ST in one call. Backend caches for 1 hour.
-     */
-    getHeartReport: async (recordId?: number): Promise<HeartReport> => {
-      const qs = recordId ? `?record_id=${recordId}` : ''
-      return request<HeartReport>(`/api/v1/patients/me/heart-report/${qs}`)
     },
   },
 

@@ -1,6 +1,5 @@
 import React from 'react'
-import { Home, Heart, Sparkles, Users, Flame, BookOpen, User, LifeBuoy } from 'lucide-react'
-
+import { Home, Sparkles, Users, Flame, BookOpen, User, LifeBuoy } from 'lucide-react'
 interface BottomNavProps {
   active: string
   onNavigate: (tab: string) => void
@@ -8,7 +7,6 @@ interface BottomNavProps {
 
 const navItems = [
   { id: 'home',    label: 'Home',    Icon: Home },
-  { id: 'ecg',     label: 'ECG',     Icon: Heart },
   { id: 'alyna',   label: 'Alyna',   Icon: Sparkles },
   { id: 'rhythm',  label: 'Rhythm',  Icon: Flame },
   { id: 'circle',  label: 'Circle',  Icon: Users },
