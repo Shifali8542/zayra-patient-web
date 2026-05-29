@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useDashboard } from '../../hooks/useDashboard'
 import { useAuthContext } from '../../contexts/AuthContext'
+import { useECGWebSocket } from '../../hooks/useECGWebSocket'
 import { BottomNav } from '../../components/ui/BottomNav'
 import { ZayraLogo } from '../../components/ui/ZayraLogo'
 import { HomeTab } from './HomeTab'
@@ -24,6 +25,20 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [openTicketId, setOpenTicketId] = useState<number | null>(null)
   const dashboard = useDashboard()
   const { tokens } = useAuthContext()
+
+  // WebSocket ECG — auto-connects once patientMe is loaded
+  const ecgWS = useECGWebSocket(
+    dashboard.patientNumericId,
+    dashboard.firstRecordId,
+    tokens?.access ?? null,
+  )
+
+  // Auto-start streaming as soon as metadata arrives from the server
+  React.useEffect(() => {
+    if (ecgWS.status === 'streaming' && ecgWS.metadata) {
+      ecgWS.start(1)
+    }
+  }, [ecgWS.status])
 
   const renderTab = () => {
     if (dashboard.loading && !dashboard.patientMe) return null
@@ -74,6 +89,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
             timeline={dashboard.timeline}
             interpretation={dashboard.interpretation}
             stResult={dashboard.stResult}
+            ecgWS={ecgWS}
           />
         )
       case 'alyna':

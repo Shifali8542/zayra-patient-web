@@ -1,6 +1,9 @@
 import React from 'react'
 import { useGreeting } from '../../hooks/useGreeting'
 import type { HealthMetric, TimelineEvent, TimelineEventType, PatientSTResult, User } from '../../types'
+import { useBLEContext } from '../../contexts/BLEContext'
+import { BLEConnectionButton } from '../../components/ble/BLEConnectionButton'
+import type { WSECGHookResult } from '../../hooks/useECGWebSocket'
 
 interface HomeTabProps {
   user: User
@@ -8,6 +11,7 @@ interface HomeTabProps {
   timeline: TimelineEvent[]
   interpretation: string | null
   stResult: PatientSTResult | null
+  ecgWS: WSECGHookResult
 }
 
 function fmt(val: number | null | undefined): string {
@@ -25,8 +29,10 @@ function timelineIconColor(type: TimelineEventType) {
   }
 }
 
-export function HomeTab({ user, metrics, timeline, interpretation, stResult }: HomeTabProps) {
+export function HomeTab({ user, metrics, timeline, interpretation, stResult, ecgWS }: HomeTabProps) {
   const greeting = useGreeting()
+  const { status: bleStatus } = useBLEContext()
+  const displayBpm = ecgWS.liveBpm
   const firstName = user.first_name?.toLowerCase() || user.name?.toLowerCase() || ''
 
   return (
@@ -48,7 +54,7 @@ export function HomeTab({ user, metrics, timeline, interpretation, stResult }: H
       {/* ST Emergency Alert — only when stemi_suspected = true */}
       {stResult?.emergency_alert && (
         <div className="flex items-start gap-2 p-3 rounded-2xl border"
-             style={{ backgroundColor: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)' }}>
+          style={{ backgroundColor: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)' }}>
           <span className="text-base">🚨</span>
           <p className="text-xs font-medium" style={{ color: '#EF4444' }}>
             {stResult.your_result} — {stResult.what_this_means}
@@ -60,12 +66,15 @@ export function HomeTab({ user, metrics, timeline, interpretation, stResult }: H
       <div className="card p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-zayra-teal animate-pulse" />
+            <div className={`w-2 h-2 rounded-full animate-pulse ${bleStatus === 'streaming' ? 'bg-zayra-teal' : 'bg-gray-300'}`} />
             <span className="text-xs font-semibold tracking-widest text-gray-500 uppercase">Axiom — Live</span>
           </div>
-          <span className="text-xs font-semibold bg-zayra-teal/10 text-zayra-teal px-2 py-0.5 rounded-full">
-            {metrics?.signalStrength != null ? `Signal ${metrics.signalStrength}%` : 'Signal —'}
-          </span>
+          <div className="flex items-center gap-2">
+            <BLEConnectionButton />
+            <span className="text-xs font-semibold bg-zayra-teal/10 text-zayra-teal px-2 py-0.5 rounded-full">
+              {bleStatus === 'streaming' ? 'BLE Connected' : metrics?.signalStrength != null ? `Signal ${metrics.signalStrength}%` : 'Signal —'}
+            </span>
+          </div>
         </div>
 
         {/* Real AI narrative */}
@@ -76,8 +85,10 @@ export function HomeTab({ user, metrics, timeline, interpretation, stResult }: H
         <div className="flex items-center justify-around mt-3 pt-3 border-t border-gray-100">
           {/* Avg HR */}
           <div className="text-center">
-            <p className="font-display font-bold text-2xl text-zayra-navy dark:text-white">{fmt(metrics?.avgHr)}</p>
-            <p className="text-xs text-gray-400 uppercase tracking-wide">Avg HR</p>
+            <p className="font-display font-bold text-2xl text-zayra-navy dark:text-white">
+              {displayBpm ? fmt(displayBpm) : fmt(metrics?.avgHr)}
+            </p>
+            <p className="text-xs text-gray-400 uppercase tracking-wide">{displayBpm ? 'Live BPM' : 'Avg HR'}</p>
           </div>
           <div className="w-px h-8 bg-gray-100" />
           {/* HRV  */}

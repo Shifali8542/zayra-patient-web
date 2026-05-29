@@ -1,10 +1,7 @@
-// =============================================================================
-// src/App.tsx
-// =============================================================================
-
 import React, { useState } from 'react'
 import { AuthProvider, useAuthContext } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { BLEProvider } from './contexts/BLEContext'
 import { LoginPage } from './pages/Login/Login'
 import { SignupPage } from './pages/Signup/Signup'
 import { DashboardPage } from './pages/Dashboard/Dashboard'
@@ -38,7 +35,9 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppRoutes />
+        <BLEProvider>
+          <AppRoutes />
+        </BLEProvider>
       </AuthProvider>
     </ThemeProvider>
   )

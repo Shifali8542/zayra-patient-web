@@ -192,5 +192,9 @@ export function useDashboard() {
 
   const clearCache = useCallback(() => { }, [])
 
-  return { ...state, sendAlynaMessage, clearCache, reload: loadAll }
+  // Expose IDs needed for WebSocket ECG streaming
+  const patientNumericId = state.patientMe?.id ?? null
+  const firstRecordId    = state.patientMe?.ecg_records[0]?.id ?? null
+
+  return { ...state, sendAlynaMessage, clearCache, reload: loadAll, patientNumericId, firstRecordId }
 }
