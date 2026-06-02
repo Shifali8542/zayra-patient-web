@@ -15,10 +15,11 @@ type ErrorListener = (message: string) => void
 
 // Singleton class
 export class BLEDeviceManager {
-    private device: BluetoothDevice | null = null
-    private server: BluetoothRemoteGATTServer | null = null
-    private reconnectAttempts = 0
-    private _isReconnecting = false
+  private device: BluetoothDevice | null = null
+  private server: BluetoothRemoteGATTServer | null = null
+  private reconnectAttempts = 0
+  private _isReconnecting = false
+  private _connected = false
 
     private statusListeners: Set<StatusListener> = new Set()
     private vitalsListeners: Set<VitalsListener> = new Set()
@@ -33,23 +34,46 @@ export class BLEDeviceManager {
     onError(fn: ErrorListener) { this.errorListeners.add(fn); return () => this.errorListeners.delete(fn) }
 
     async connect(): Promise<void> {
-        if (!navigator.bluetooth) {
-            this.emitError('Web Bluetooth is not supported in this browser.')
-            return
+    if (!navigator.bluetooth) {
+      const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
+      if (!isChrome) {
+        this.emitError('Please use Google Chrome to connect the Axiom device.')
+      } else {
+        this.emitError('Bluetooth not available. Make sure this page is opened on https://')
+      }
+      this.emitStatus('error')
+      return
+    }
+
+    // Forget previously paired device so Chrome always shows fresh scan list
+    // This is the industry fix for Chrome BLE caching problem
+    if (this.device) {
+      try {
+        // Disconnect cleanly if still connected
+        if (this.device.gatt?.connected) {
+          this.device.gatt.disconnect()
         }
-        this.device = null
-        this.server = null
-        this.reconnectAttempts = 0
-        this._isReconnecting = false
-        try {
-            this.emitStatus('scanning')
-            this.device = await navigator.bluetooth.requestDevice({
-                filters: [{ name: BLE_DEVICE_NAME }],
-                optionalServices: [
-                    BLE_SERVICES.ECG,
-                    BLE_SERVICES.VITALS,
-                ],
-            })
+        // Forget the device — removes Chrome's internal cache for this device
+        if (typeof (this.device as any).forget === 'function') {
+          await (this.device as any).forget()
+        }
+      } catch { /* ignore forget errors */ }
+    }
+
+    this.device = null
+    this.server = null
+    this.reconnectAttempts = 0
+    this._isReconnecting = false
+
+    try {
+      this.emitStatus('scanning')
+      this.device = await navigator.bluetooth.requestDevice({
+        filters: [{ name: BLE_DEVICE_NAME }],
+        optionalServices: [
+          BLE_SERVICES.ECG,
+          BLE_SERVICES.VITALS,
+        ],
+      })
             this.device.addEventListener('gattserverdisconnected', this.handleDisconnect)
             await this.connectGATT()
         } catch (e: unknown) {
@@ -63,13 +87,24 @@ export class BLEDeviceManager {
     }
 
     async disconnect(): Promise<void> {
-        this._isReconnecting = false
-        this.reconnectAttempts = 0
-        if (this.device?.gatt?.connected) {
-            this.device.gatt.disconnect()
-        }
-        this.emitStatus('idle')
+    this._isReconnecting = false
+    this._connected = false
+    this.reconnectAttempts = 0
+
+    if (this.device?.gatt?.connected) {
+      this.device.gatt.disconnect()
     }
+
+    // Forget device on manual disconnect
+    // Forces Chrome to show fresh scan list on next connect
+    if (this.device && typeof (this.device as any).forget === 'function') {
+      try { await (this.device as any).forget() } catch { /* ignore */ }
+    }
+
+    this.device = null
+    this.server = null
+    this.emitStatus('idle')
+  }
 
     get isConnected(): boolean {
         return this.device?.gatt?.connected ?? false

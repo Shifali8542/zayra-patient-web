@@ -9,8 +9,25 @@ import { DashboardPage } from './pages/Dashboard/Dashboard'
 type Route = 'login' | 'signup'
 
 function AppRoutes() {
-  const { isAuthenticated, user, logout } = useAuthContext()
+  const { isAuthenticated, user, logout, loading } = useAuthContext()
   const [route, setRoute] = useState<Route>('login')
+
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        background: '#E4F7F5',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <img src="/icon.png" alt="Zayra" style={{ width: 48, marginBottom: 16 }} />
+          <p style={{ color: '#00C2B2', fontSize: 14, fontWeight: 600 }}>Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (isAuthenticated && user) {
     return (

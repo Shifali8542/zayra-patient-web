@@ -1,11 +1,38 @@
-// =============================================================================
-// src/contexts/AuthContext.tsx
-// Real backend authentication. Zero mock imports.
-// =============================================================================
-
 import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import type { User, AuthTokens } from '../types'
 import { api, setTokens, setRefreshFailedCallback } from '../services/api'
+
+// ── Persistence keys ──────────────────────────────────────────────────────────
+const STORAGE_KEY_ACCESS = 'zayra_access_token'
+const STORAGE_KEY_REFRESH = 'zayra_refresh_token'
+const STORAGE_KEY_USER = 'zayra_user'
+
+function persistSession(user: User, tokens: AuthTokens): void {
+  try {
+    localStorage.setItem(STORAGE_KEY_ACCESS, tokens.access)
+    localStorage.setItem(STORAGE_KEY_REFRESH, tokens.refresh)
+    localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(user))
+  } catch { /* storage quota exceeded — ignore */ }
+}
+
+function clearSession(): void {
+  localStorage.removeItem(STORAGE_KEY_ACCESS)
+  localStorage.removeItem(STORAGE_KEY_REFRESH)
+  localStorage.removeItem(STORAGE_KEY_USER)
+}
+
+function restoreSession(): { user: User; tokens: AuthTokens } | null {
+  try {
+    const access = localStorage.getItem(STORAGE_KEY_ACCESS)
+    const refresh = localStorage.getItem(STORAGE_KEY_REFRESH)
+    const userRaw = localStorage.getItem(STORAGE_KEY_USER)
+    if (!access || !refresh || !userRaw) return null
+    const user = JSON.parse(userRaw) as User
+    return { user, tokens: { access, refresh } }
+  } catch {
+    return null
+  }
+}
 
 interface AuthContextType {
   isAuthenticated: boolean
@@ -25,19 +52,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [tokens, setTokensState] = useState<AuthTokens | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)   // true on first load — wait for restore
   const [error, setError] = useState<string | null>(null)
 
-  // Register forced-logout callback for expired refresh tokens
+  // ── Restore session on app startup (page refresh) ─────────────────────────
+  useEffect(() => {
+    const saved = restoreSession()
+    if (saved) {
+      // Restore tokens into api service so API calls work immediately
+      setTokens(saved.tokens)
+      setUser(saved.user)
+      setTokensState(saved.tokens)
+      setIsAuthenticated(true)
+    }
+    setLoading(false)
+  }, [])
+
+  // ── Register forced-logout callback for expired refresh tokens ────────────
   useEffect(() => {
     setRefreshFailedCallback(() => {
+      clearSession()
       setUser(null)
       setTokensState(null)
       setIsAuthenticated(false)
       setTokens(null)
     })
   }, [])
-
   const clearError = useCallback(() => setError(null), [])
 
   const login = useCallback(async (email: string, password: string) => {
@@ -45,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
     try {
       const { user: u, tokens: t } = await api.auth.login(email, password)
+      persistSession(u, t)   // ← save to localStorage
       setUser(u)
       setTokensState(t)
       setIsAuthenticated(true)
@@ -62,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null)
     try {
       const { user: u, tokens: t } = await api.auth.register(name, email, password)
+      persistSession(u, t)
       setUser(u)
       setTokensState(t)
       setIsAuthenticated(true)
@@ -79,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.auth.logout()
     } finally {
+      clearSession() 
       setUser(null)
       setTokensState(null)
       setIsAuthenticated(false)
