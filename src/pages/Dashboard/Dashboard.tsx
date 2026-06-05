@@ -182,7 +182,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
             response — adapting to who you are and what you need.
           </p>
 
-          <div className="grid grid-cols-3 gap-4 mb-10 max-w-[526px]">
+          <div className="grid grid-cols-3 gap-3 mb-10 max-w-[526px] w-full">
             {[
               { Icon: Link2, title: 'Wellness', sub: 'Body intelligence, daily' },
               { Icon: Sparkles, title: 'Care', sub: 'Quiet cardiac vigilance' },
@@ -190,17 +190,24 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
             ].map(item => (
               <div
                 key={item.title}
-                className="min-h-[132px] rounded-[1.35rem] border border-white/80 bg-white/70 p-5 backdrop-blur-sm
-                           hover:bg-white/90 transition-all cursor-pointer"
-                style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+                // Removed fixed min-height, changed to vertical flex with smaller padding to create the horizontal aspect ratio
+                className="flex flex-col justify-between rounded-2xl border border-white/80 bg-white/70 p-4 backdrop-blur-sm
+                 hover:bg-white/90 transition-all cursor-pointer shadow-[0_2px_12px_rgba(0,0,0,0.04)]"
               >
-                <item.Icon size={15} strokeWidth={2.4} className="mb-7 text-zayra-teal" />
-                <p className="text-[15px] font-semibold text-zayra-navy dark:text-white">{item.title}</p>
-                <p className="mt-1 text-[14px] leading-snug text-gray-400">{item.sub}</p>
+                {/* Reduced bottom margin on the icon so it doesn't push the card into a tall square layout */}
+                <item.Icon size={15} strokeWidth={2.4} className="mb-4 text-zayra-teal" />
+
+                <div>
+                  <p className="text-[14px] font-semibold text-zayra-navy dark:text-white leading-tight">
+                    {item.title}
+                  </p>
+                  <p className="mt-1 text-[12px] leading-tight text-gray-400">
+                    {item.sub}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
-
           <div className="flex items-start gap-1">
             <ZayraLogo size={50} showText={false} />
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
