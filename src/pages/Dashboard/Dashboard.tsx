@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Diamond, Link2, Sparkles } from 'lucide-react'
 import { useDashboard } from '../../hooks/useDashboard'
 import { useAuthContext } from '../../contexts/AuthContext'
 import { useECGWebSocket } from '../../hooks/useECGWebSocket'
@@ -139,18 +140,19 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col"
-      style={{ background: 'linear-gradient(160deg, #D6F3F0 0%, #C8EEE9 30%, #D8F2EF 60%, #E4F7F5 100%)' }}>
+    <div className="relative min-h-screen flex flex-col overflow-hidden bg-[#EEF8F7]">
+      <div className="pointer-events-none absolute -top-40 left-1/4 h-[640px] w-[640px] rounded-full bg-[#7FE8E0]/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 right-1/4 h-[560px] w-[560px] rounded-full bg-[#36D2CF]/30 blur-3xl" />
 
       {/* ─── Navbar ─── */}
       <Navbar onRequestAccess={() => { }} />
 
       {/* ─── Hero + Phone ─── */}
-      <div className="flex-1 flex flex-col lg:flex-row items-start justify-between
-                      gap-8 xl:gap-16 px-8 md:px-12 pt-4 pb-12 max-w-[1400px] mx-auto w-full">
+      <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-start justify-between
+                      gap-8 xl:gap-16 px-6 lg:px-10 pt-4 pb-24 max-w-7xl mx-auto w-full">
 
         {/* LEFT: Marketing copy */}
-        <div className="flex-1 max-w-2xl animate-slide-up pt-8 lg:pt-16">
+        <div className="flex-1 max-w-[526px] animate-slide-up pt-8 lg:pt-16">
 
           <div className="inline-flex items-center gap-2 bg-white/60 border border-white/80
                           rounded-full px-4 py-2 mb-8 backdrop-blur-sm">
@@ -161,13 +163,12 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
           </div>
 
           <div className="mb-8">
-            <h1 className="font-display font-black text-[4.5rem] md:text-[5.5rem] leading-none
-                           text-zayra-navy dark:text-white tracking-tight">
+            <h1 className="font-display text-[44px] font-semibold leading-[1.05] tracking-tight text-balance text-zayra-navy dark:text-white md:text-[58px]">
               Know your body
             </h1>
             <div
-              className="mt-2 h-14 rounded-lg"
-              style={{ width: '75%', background: 'linear-gradient(90deg, #0D1B2A 0%, #00C2B2 100%)' }}
+              className="mt-6 h-[74px] rounded-lg"
+              style={{ width: '100%', background: 'linear-gradient(90deg, #0D1B2A 0%, #00C2B2 100%)' }}
             />
           </div>
 
@@ -181,49 +182,49 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
             response — adapting to who you are and what you need.
           </p>
 
-          <div className="grid grid-cols-3 gap-4 mb-10 max-w-lg">
+          <div className="grid grid-cols-3 gap-4 mb-10 max-w-[526px]">
             {[
-              { icon: '💗', title: 'Wellness', sub: 'Body intelligence, daily' },
-              { icon: '📡', title: 'Care', sub: 'Quiet cardiac vigilance' },
-              { icon: '🛡️', title: 'Evac', sub: 'Help, ready and routed' },
+              { Icon: Link2, title: 'Wellness', sub: 'Body intelligence, daily' },
+              { Icon: Sparkles, title: 'Care', sub: 'Quiet cardiac vigilance' },
+              { Icon: Diamond, title: 'Evac', sub: 'Help, ready and routed' },
             ].map(item => (
               <div
                 key={item.title}
-                className="bg-white/70 backdrop-blur-sm rounded-2xl border border-white/80 p-4
+                className="min-h-[132px] rounded-[1.35rem] border border-white/80 bg-white/70 p-5 backdrop-blur-sm
                            hover:bg-white/90 transition-all cursor-pointer"
                 style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
               >
-                <div className="text-xl mb-2">{item.icon}</div>
-                <p className="font-semibold text-sm text-zayra-navy dark:text-white">{item.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{item.sub}</p>
+                <item.Icon size={15} strokeWidth={2.4} className="mb-7 text-zayra-teal" />
+                <p className="text-[15px] font-semibold text-zayra-navy dark:text-white">{item.title}</p>
+                <p className="mt-1 text-[14px] leading-snug text-gray-400">{item.sub}</p>
               </div>
             ))}
           </div>
 
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-1">
             <ZayraLogo size={50} showText={false} />
             <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
               <strong className="text-zayra-navy dark:text-white">Try the live experience →</strong>{' '}
-              tap a tab and explore Wellness, Care, Evac or Hospital — all adapt in tone, navigation and intelligence.
+              tap Begin, choose a journey, and explore Wellness, Care, Evac or Hospital — all adapt in tone, navigation and intelligence.
             </p>
           </div>
         </div>
 
         {/* RIGHT: Phone frame */}
         <div className="w-full lg:w-auto flex-shrink-0 flex justify-center lg:justify-end lg:sticky lg:top-8 self-start">
-          <div className="relative rounded-[2.8rem] overflow-hidden bg-white"
+          <div className="relative rounded-[3rem] overflow-hidden bg-gradient-to-b from-white to-[#F2FAFA] p-[10px]"
             style={{
-              width: 460,
-              minHeight: 980,
+              width: 400,
+              height: 860,
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '0 24px 80px rgba(0,194,178,0.18), 0 8px 32px rgba(0,0,0,0.10)',
-              border: '2.5px solid rgba(255,255,255,0.95)',
             }}
           >
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[2.35rem] bg-white">
             {/* Notch */}
             <div className="flex justify-center pt-3 pb-0 bg-white">
-              <div className="w-28 h-7 bg-gray-900 rounded-full" />
+              <div className="w-24 h-6 bg-gray-900 rounded-full" />
             </div>
 
             {/* App header */}
@@ -233,7 +234,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
             </div>
 
             {/* Tab content */}
-            <div className="overflow-y-auto bg-white flex-1" style={{ maxHeight: 640 }}>
+            <div className="overflow-y-auto bg-white flex-1">
               {dashboard.loading ? (
                 <div className="flex flex-col items-center justify-center h-40 gap-3">
                   <div className="w-8 h-8 border-2 border-zayra-teal/30 border-t-zayra-teal rounded-full animate-spin" />
@@ -252,13 +253,17 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                 setActiveTab(tab)
               }}
             />
+            </div>
           </div>
         </div>
       </div>
 
       {/* ─── Footer ─── */}
-      <footer className="flex items-center justify-between px-8 md:px-12 py-5 border-t border-white/30">
-        <p className="text-xs text-gray-400">Calm vigilance. Clinician-validated. © Zayra Health.</p>
+      <footer className="relative z-10 border-t border-white/60 bg-white/40 px-6 py-5 mb-10 backdrop-blur-md lg:px-10">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+          <ZayraLogo size={28} />
+          <p className="text-xs text-gray-400">Calm vigilance. Clinician-validated. © Zayra Health.</p>
+        </div>
       </footer>
     </div>
   )
