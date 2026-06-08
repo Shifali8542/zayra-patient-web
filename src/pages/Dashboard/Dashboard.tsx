@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Diamond, Link2, Sparkles } from 'lucide-react'
+import { HeartPulse, ShieldCheck, Sparkles, ArrowRight, Heart, Activity, Stethoscope } from 'lucide-react'
 import { useDashboard } from '../../hooks/useDashboard'
 import { useAuthContext } from '../../contexts/AuthContext'
 import { useECGWebSocket } from '../../hooks/useECGWebSocket'
@@ -24,6 +24,8 @@ interface DashboardPageProps {
 export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [activeTab, setActiveTab] = useState('home')
   const [openTicketId, setOpenTicketId] = useState<number | null>(null)
+  const [phoneState, setPhoneState] = useState<'landing' | 'journey' | 'name' | 'dashboard'>('landing')
+  const [onboardingName, setOnboardingName] = useState('')
   const dashboard = useDashboard()
   const { tokens } = useAuthContext()
 
@@ -140,136 +142,274 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-hidden bg-[#EEF8F7]">
-      <div className="pointer-events-none absolute -top-40 left-1/4 h-[640px] w-[640px] rounded-full bg-[#7FE8E0]/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 right-1/4 h-[560px] w-[560px] rounded-full bg-[#36D2CF]/30 blur-3xl" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-hero">
+      <div
+        className="pointer-events-none absolute -top-40 left-1/4 h-[640px] w-[640px] rounded-full blur-3xl"
+        style={{ backgroundColor: 'color-mix(in oklch, var(--aqua) 20%, transparent)' }}
+      />
+      <div
+        className="pointer-events-none absolute -bottom-40 right-1/4 h-[560px] w-[560px] rounded-full blur-3xl"
+        style={{ backgroundColor: 'color-mix(in oklch, var(--cyan-glow) 30%, transparent)' }}
+      />
 
-      {/* ─── Navbar ─── */}
       <Navbar onRequestAccess={() => { }} />
 
-      {/* ─── Hero + Phone ─── */}
-      <div className="relative z-10 flex-1 flex flex-col lg:flex-row items-start justify-between
-                      gap-8 xl:gap-16 px-6 lg:px-10 pt-4 pb-24 max-w-7xl mx-auto w-full">
+      <section className="relative z-10 mx-auto grid max-w-7xl gap-12 px-6 pb-24 pt-8 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-10 lg:pt-16">
 
-        {/* LEFT: Marketing copy */}
-        <div className="flex-1 max-w-[526px] animate-slide-up pt-8 lg:pt-16">
-
-          <div className="inline-flex items-center gap-2 bg-white/60 border border-white/80
-                          rounded-full px-4 py-2 mb-8 backdrop-blur-sm">
-            <div className="w-2 h-2 rounded-full bg-zayra-teal animate-pulse" />
-            <span className="text-xs font-semibold tracking-widest text-gray-500 uppercase">
-              Adaptive Health OS · Iteration 1
-            </span>
+        {/* Left Column: Marketing */}
+        <div className="flex flex-col justify-center">
+          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground backdrop-blur-md shadow-soft">
+            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+            Adaptive health OS · Iteration 1
           </div>
 
-          <div className="mb-8">
-            <h1 className="font-display text-[44px] font-semibold leading-[1.05] tracking-tight text-balance text-zayra-navy dark:text-white md:text-[58px]">
-              Know your body
-            </h1>
-            <div
-              className="mt-6 h-[74px] rounded-lg"
-              style={{ width: '100%', background: 'linear-gradient(90deg, #0D1B2A 0%, #00C2B2 100%)' }}
-            />
-          </div>
+          <h1 className="mt-6 font-display text-[4px] font-semibold leading-[1.05] tracking-tight text-balance md:text-[48px]">
+            Know your body<br />
+            <span className="bg-gradient-pulse bg-clip-text text-transparent">before it asks for help.</span>
+          </h1>
 
-          <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed mb-10 max-w-lg">
-            Zayra is a governed-AI cardiac and physiological intelligence platform —{' '}
-            <strong className="font-semibold text-zayra-navy dark:text-white">Zen</strong> wristband,{' '}
-            <strong className="font-semibold text-zayra-navy dark:text-white">Axiom</strong> ECG patch,{' '}
-            <strong className="font-semibold text-zayra-navy dark:text-white">Alyna</strong> AI engine,
-            clinician validation, and{' '}
-            <strong className="font-semibold text-zayra-navy dark:text-white">Evac</strong> assisted
-            response — adapting to who you are and what you need.
+          <p className="mt-5 max-w-[520px] text-[16px] leading-relaxed text-muted-foreground text-balance md:text-[17px]">
+            Zayra is a governed-AI cardiac and physiological intelligence platform —
+            <span className="text-foreground font-medium"> Zen</span> wristband,
+            <span className="text-foreground font-medium"> Axiom</span> ECG patch,
+            <span className="text-foreground font-medium"> Alyna</span> AI engine, clinician validation, and
+            <span className="text-foreground font-medium"> Evac</span> assisted response — adapting to who you are and what you need.
           </p>
 
-          <div className="grid grid-cols-3 gap-3 mb-10 max-w-[526px] w-full">
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
             {[
-              { Icon: Link2, title: 'Wellness', sub: 'Body intelligence, daily' },
+              { Icon: HeartPulse, title: 'Wellness', sub: 'Body intelligence, daily' },
               { Icon: Sparkles, title: 'Care', sub: 'Quiet cardiac vigilance' },
-              { Icon: Diamond, title: 'Evac', sub: 'Help, ready and routed' },
-            ].map(item => (
-              <div
-                key={item.title}
-                // Removed fixed min-height, changed to vertical flex with smaller padding to create the horizontal aspect ratio
-                className="flex flex-col justify-between rounded-2xl border border-white/80 bg-white/70 p-4 backdrop-blur-sm
-                 hover:bg-white/90 transition-all cursor-pointer shadow-[0_2px_12px_rgba(0,0,0,0.04)]"
-              >
-                {/* Reduced bottom margin on the icon so it doesn't push the card into a tall square layout */}
-                <item.Icon size={15} strokeWidth={2.4} className="mb-4 text-zayra-teal" />
-
-                <div>
-                  <p className="text-[14px] font-semibold text-zayra-navy dark:text-white leading-tight">
-                    {item.title}
-                  </p>
-                  <p className="mt-1 text-[12px] leading-tight text-gray-400">
-                    {item.sub}
-                  </p>
-                </div>
+              { Icon: ShieldCheck, title: 'Evac', sub: 'Help, ready and routed' },
+            ].map((item) => (
+              <div key={item.title} className="rounded-2xl border border-border bg-card/70 p-4 shadow-soft backdrop-blur-md cursor-pointer hover:bg-card transition-colors">
+                <item.Icon className="h-4 w-4 text-aqua" strokeWidth={2} />
+                <p className="mt-2 font-display text-[15px] font-semibold text-foreground">{item.title}</p>
+                <p className="text-[12.5px] text-muted-foreground">{item.sub}</p>
               </div>
             ))}
           </div>
-          <div className="flex items-start gap-1">
-            <ZayraLogo size={50} showText={false} />
-            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-              <strong className="text-zayra-navy dark:text-white">Try the live experience →</strong>{' '}
-              tap Begin, choose a journey, and explore Wellness, Care, Evac or Hospital — all adapt in tone, navigation and intelligence.
-            </p>
-          </div>
+
+          <p className="mt-8 max-w-[460px] text-[13px] text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+              <ZayraLogo size={16} showText={false} /> Try the live experience →
+            </span>{' '}
+            tap <em>Begin</em>, choose a journey, and explore Wellness, Care, Evac or Hospital — all adapt in tone, navigation and intelligence.
+          </p>
         </div>
 
-        {/* RIGHT: Phone frame */}
-        <div className="w-full lg:w-auto flex-shrink-0 flex justify-center lg:justify-end lg:sticky lg:top-8 self-start">
-          <div className="relative rounded-[3rem] overflow-hidden bg-gradient-to-b from-white to-[#F2FAFA] p-[10px]"
-            style={{
-              width: 400,
-              height: 860,
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 24px 80px rgba(0,194,178,0.18), 0 8px 32px rgba(0,0,0,0.10)',
-            }}
-          >
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[2.35rem] bg-white">
-            {/* Notch */}
-            <div className="flex justify-center pt-3 pb-0 bg-white">
-              <div className="w-24 h-6 bg-gray-900 rounded-full" />
-            </div>
-
-            {/* App header */}
-            <div className="flex items-center justify-between px-5 py-3 bg-white border-b border-gray-50">
-              <ZayraLogo size={50} />
-              <div className="w-7" />
-            </div>
-
-            {/* Tab content */}
-            <div className="overflow-y-auto bg-white flex-1">
-              {dashboard.loading ? (
-                <div className="flex flex-col items-center justify-center h-40 gap-3">
-                  <div className="w-8 h-8 border-2 border-zayra-teal/30 border-t-zayra-teal rounded-full animate-spin" />
-                  <p className="text-xs text-gray-400">Loading your health data…</p>
-                </div>
-              ) : (
-                <div className="pt-3">{renderTab()}</div>
-              )}
-            </div>
-
-            {/* Bottom nav */}
-            <BottomNav
-              active={activeTab}
-              onNavigate={(tab) => {
-                if (tab !== 'support') setOpenTicketId(null)
-                setActiveTab(tab)
+        {/* Right Column: Phone Frame */}
+        <div className="flex justify-center lg:justify-end">
+          <div className="relative mx-auto">
+            <div
+              className="relative h-[860px] w-[400px] rounded-[3rem] p-[10px] shadow-elevated"
+              style={{
+                background: 'linear-gradient(to bottom, white, var(--mist))',
+                boxShadow: '0 60px 120px -40px oklch(0.32 0.07 245 / 0.35), 0 0 0 1px oklch(0.32 0.07 245 / 0.08)'
               }}
-            />
+            >
+              <div className="relative flex flex-col h-full w-full overflow-hidden rounded-[2.4rem]" style={{ backgroundColor: 'var(--pearl)' }}>
+                {/* Notch */}
+                <div className="absolute left-1/2 top-3 z-50 h-7 w-28 -translate-x-1/2 rounded-full bg-black/90" />
+
+                {/* 1. LANDING SCREEN */}
+                {phoneState === 'landing' && (
+                  <div className="relative h-full w-full overflow-y-auto no-scrollbar">
+                    <div className="relative h-full w-full bg-gradient-hero overflow-hidden">
+                      <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-[480px] w-[480px] rounded-full blur-3xl" style={{ backgroundColor: 'color-mix(in oklch, var(--aqua) 30%, transparent)' }}></div>
+                      <div className="pointer-events-none absolute -bottom-24 -right-12 h-[360px] w-[360px] rounded-full blur-3xl" style={{ backgroundColor: 'color-mix(in oklch, var(--cyan-glow) 40%, transparent)' }}></div>
+                      <div className="relative flex h-full flex-col items-center justify-between px-8 pt-24 pb-12">
+                        
+                        <div className="flex items-center gap-2">
+                          <ZayraLogo size={32} showText={false} />
+                          <span className="font-display text-lg font-semibold tracking-tight text-foreground">Zayra</span>
+                        </div>
+                        
+                        <div className="flex flex-col items-center text-center">
+                          <div className="relative mb-8">
+                            <span className="absolute inset-0 rounded-full animate-pulse-ring" style={{ backgroundColor: 'color-mix(in oklch, var(--aqua) 30%, transparent)' }}></span>
+                            <span className="absolute inset-0 rounded-full animate-pulse-ring" style={{ backgroundColor: 'color-mix(in oklch, var(--aqua) 20%, transparent)', animationDelay: '0.6s' }}></span>
+                            <div className="relative animate-heartbeat rounded-3xl shadow-soft">
+                              <ZayraLogo size={96} showText={false} />
+                            </div>
+                          </div>
+                          <h1 className="font-display text-[34px] leading-[1.1] font-semibold tracking-tight text-balance text-foreground">
+                            Know your body<br />before it asks for help.
+                          </h1>
+                          <p className="mt-4 text-[15px] text-muted-foreground text-balance max-w-[280px]">
+                            Governed-AI cardiac and physiological intelligence — calm, continuous, clinician-validated.
+                          </p>
+                        </div>
+                        
+                        <button 
+                          onClick={() => setPhoneState('journey')} 
+                          className="group flex w-full items-center justify-between rounded-2xl bg-gradient-ink px-6 py-4 text-primary-foreground shadow-elevated transition-smooth hover:shadow-glow"
+                        >
+                          <span className="font-display text-base font-medium">Begin</span>
+                          <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+               {/* 2. JOURNEY SCREEN */}
+                {phoneState === 'journey' && (
+                  <div className="relative h-full w-full bg-pearl overflow-y-auto no-scrollbar" style={{ backgroundColor: 'var(--pearl)' }}>
+                    <div className="px-6 pt-14 pb-8">
+                      <div className="flex items-center gap-2">
+                        <ZayraLogo size={32} showText={false} />
+                        <span className="font-display text-lg font-semibold tracking-tight">Zayra</span>
+                      </div>
+                      <h2 className="mt-8 font-display text-[28px] leading-tight font-semibold tracking-tight text-balance">Choose your journey.</h2>
+                      <p className="mt-2 text-sm text-muted-foreground text-balance">The app adapts its tone, navigation and intelligence to who you are.</p>
+                    </div>
+                    <div className="px-6 pb-10 space-y-3">
+                      <button onClick={() => setPhoneState('name')} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-cyan-glow/40 to-aqua/20" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--cyan-glow) 40%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--aqua) 20%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-soft">
+                            <Heart className="h-6 w-6 text-ink" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-display text-[17px] font-semibold tracking-tight">Zayra Wellness</h3>
+                              <ArrowRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
+                            </div>
+                            <p className="mt-0.5 text-[13px] font-medium text-ink/80">Body intelligence, daily.</p>
+                            <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">For Zen wristband users — elegant baseline, recovery and women's health insight.</p>
+                          </div>
+                        </div>
+                      </button>
+                      <button onClick={() => setPhoneState('name')} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-aqua/30 to-ink/10" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--aqua) 30%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--ink) 10%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-soft">
+                            <Activity className="h-6 w-6 text-ink" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-display text-[17px] font-semibold tracking-tight">Zayra Care</h3>
+                              <ArrowRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
+                            </div>
+                            <p className="mt-0.5 text-[13px] font-medium text-ink/80">Quiet cardiac vigilance.</p>
+                            <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">Axiom ECG patch + Alyna AI with clinician validation — continuous heart awareness.</p>
+                          </div>
+                        </div>
+                      </button>
+                      <button onClick={() => setPhoneState('name')} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-ink/90 to-ink/70 text-primary-foreground" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--ink) 90%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--ink) 70%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+                            <ShieldCheck className="h-6 w-6 text-cyan-glow" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-display text-[17px] font-semibold tracking-tight text-primary-foreground">Zayra Evac</h3>
+                              <ArrowRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100 text-primary-foreground" />
+                            </div>
+                            <p className="mt-0.5 text-[13px] font-medium text-cyan-glow">Help, ready and routed.</p>
+                            <p className="mt-2 text-[12.5px] leading-relaxed text-white/70">Assisted escalation, hospital routing, family awareness — calm operational layer.</p>
+                          </div>
+                        </div>
+                      </button>
+                      <button onClick={() => setPhoneState('name')} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-mist to-cyan-glow/30" style={{ '--tw-gradient-from': 'var(--mist)', '--tw-gradient-to': 'color-mix(in oklch, var(--cyan-glow) 30%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-soft">
+                            <Stethoscope className="h-6 w-6 text-ink" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-display text-[17px] font-semibold tracking-tight">Zayra Hospital</h3>
+                              <ArrowRight className="h-4 w-4 opacity-50 transition-transform group-hover:translate-x-1 group-hover:opacity-100" />
+                            </div>
+                            <p className="mt-0.5 text-[13px] font-medium text-ink/80">Continuity beyond discharge.</p>
+                            <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">Monitored recovery for post-discharge patients with care team continuity.</p>
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2.5. NAME ONBOARDING SCREEN */}
+                {phoneState === 'name' && (
+                  <div className="relative h-full w-full bg-pearl overflow-y-auto no-scrollbar" style={{ backgroundColor: 'var(--pearl)' }}>
+                    <div className="sticky top-0 z-10 flex items-center justify-between px-6 pt-14 pb-3 backdrop-blur-md" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 80%, transparent)' }}>
+                      <div className="flex items-center gap-2">
+                        <ZayraLogo size={32} showText={false} />
+                        <span className="font-display text-lg font-semibold tracking-tight text-foreground">Zayra</span>
+                      </div>
+                      <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground tabular-nums">1 / 4</span>
+                    </div>
+                    <div className="px-1.5">
+                      <div className="h-0.5 w-full rounded-full" style={{ backgroundColor: 'var(--mist)' }}>
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: '25%', backgroundImage: 'linear-gradient(135deg, var(--aqua) 0%, var(--cyan-glow) 100%)' }}></div>
+                      </div>
+                    </div>
+                    <div className="px-6 pt-6 pb-32 animate-fade-in">
+                      <h2 className="font-display text-[26px] font-semibold leading-tight tracking-tight text-foreground">What should we call you?</h2>
+                      <p className="mt-1.5 text-sm text-muted-foreground">A first name is enough. You stay in control.</p>
+                      <input
+                        placeholder="Your first name"
+                        value={onboardingName}
+                        onChange={(e) => setOnboardingName(e.target.value)}
+                        className="mt-6 w-full rounded-2xl border border-border px-5 py-4 text-base text-foreground outline-none transition-smooth focus:border-aqua shadow-soft focus:shadow-glow placeholder:text-muted-foreground"
+                        style={{ backgroundColor: 'var(--card)' }}
+                      />
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 border-t border-border/60 backdrop-blur-md px-6 py-4" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 90%, transparent)' }}>
+                      <button
+                        disabled={!onboardingName.trim()}
+                        onClick={() => setPhoneState('dashboard')}
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-ink px-6 py-4 font-display text-base font-medium text-primary-foreground shadow-elevated transition-smooth hover:shadow-glow disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Continue
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {/* 3. DASHBOARD SCREEN */}
+                {phoneState === 'dashboard' && (
+                  <>
+                    <div className="flex items-center justify-between px-5 pt-12 pb-3 border-b border-border z-10 bg-[var(--pearl)] flex-shrink-0">
+                      <ZayraLogo size={32} />
+                      <div className="w-7" />
+                    </div>
+
+                    <div className="relative flex-1 w-full overflow-y-auto no-scrollbar">
+                      {dashboard.loading ? (
+                        <div className="flex flex-col items-center justify-center h-40 gap-3">
+                          <div className="w-8 h-8 border-2 border-aqua/30 border-t-aqua rounded-full animate-spin" />
+                          <p className="text-xs text-muted-foreground">Loading your health data…</p>
+                        </div>
+                      ) : (
+                        <div className="pt-3 pb-8">
+                          {renderTab()}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="z-10 bg-[var(--pearl)] border-t border-border flex-shrink-0">
+                      <BottomNav
+                        active={activeTab}
+                        onNavigate={(tab) => {
+                          if (tab !== 'support') setOpenTicketId(null)
+                          setActiveTab(tab)
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ─── Footer ─── */}
-      <footer className="relative z-10 border-t border-white/60 bg-white/40 px-6 py-5 mb-10 backdrop-blur-md lg:px-10">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-          <ZayraLogo size={28} />
-          <p className="text-xs text-gray-400">Calm vigilance. Clinician-validated. © Zayra Health.</p>
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-border/60 bg-card/40 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-6 py-6 text-xs text-muted-foreground md:flex-row lg:px-10">
+          <ZayraLogo size={24} className="opacity-80" />
+          <p>Calm vigilance. Clinician-validated. © Zayra Health.</p>
         </div>
       </footer>
     </div>
