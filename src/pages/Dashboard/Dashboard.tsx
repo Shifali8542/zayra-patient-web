@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { HeartPulse, ShieldCheck, Sparkles, ArrowRight, Heart, Activity, Stethoscope } from 'lucide-react'
+import { HeartPulse, ShieldCheck, Sparkles, ArrowRight, Heart, Activity, Stethoscope, Check } from 'lucide-react'
 import { useDashboard } from '../../hooks/useDashboard'
 import { useAuthContext } from '../../contexts/AuthContext'
 import { useECGWebSocket } from '../../hooks/useECGWebSocket'
@@ -24,9 +24,17 @@ interface DashboardPageProps {
 export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [activeTab, setActiveTab] = useState('home')
   const [openTicketId, setOpenTicketId] = useState<number | null>(null)
-  const [phoneState, setPhoneState] = useState<'landing' | 'journey' | 'name' | 'dashboard'>('landing')
+  const [phoneState, setPhoneState] = useState<'landing' | 'journey' | 'name' | 'goals' | 'baseline' | 'promise' | 'dashboard'>('landing')
   const [onboardingName, setOnboardingName] = useState('')
+  const [selectedGoals, setSelectedGoals] = useState<string[]>([])
+  const [age, setAge] = useState(32)
   const dashboard = useDashboard()
+  
+  const toggleGoal = (goal: string) => {
+    setSelectedGoals(prev => 
+      prev.includes(goal) ? prev.filter(g => g !== goal) : [...prev, goal]
+    )
+  }
   const { tokens } = useAuthContext()
 
   // WebSocket ECG — auto-connects once patientMe is loaded
@@ -358,7 +366,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                     <div className="absolute bottom-0 left-0 right-0 border-t border-border/60 backdrop-blur-md px-6 py-4" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 90%, transparent)' }}>
                       <button
                         disabled={!onboardingName.trim()}
-                        onClick={() => setPhoneState('dashboard')}
+                        onClick={() => setPhoneState('goals')}
                         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-ink px-6 py-4 font-display text-base font-medium text-primary-foreground shadow-elevated transition-smooth hover:shadow-glow disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Continue
@@ -367,6 +375,166 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                     </div>
                   </div>
                 )}
+
+                {/* 2.6. GOALS ONBOARDING SCREEN */}
+                {phoneState === 'goals' && (
+                  <div className="relative h-full w-full bg-pearl overflow-y-auto no-scrollbar" style={{ backgroundColor: 'var(--pearl)' }}>
+                    <div className="sticky top-0 z-10 flex items-center justify-between px-6 pt-14 pb-3 backdrop-blur-md" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 80%, transparent)' }}>
+                      <div className="flex items-center gap-2">
+                        <ZayraLogo size={32} showText={false} />
+                        <span className="font-display text-lg font-semibold tracking-tight text-foreground">Zayra</span>
+                      </div>
+                      <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground tabular-nums">2 / 4</span>
+                    </div>
+                    <div className="px-1.5">
+                      <div className="h-0.5 w-full rounded-full" style={{ backgroundColor: 'var(--mist)' }}>
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: '50%', backgroundImage: 'linear-gradient(135deg, var(--aqua) 0%, var(--cyan-glow) 100%)' }}></div>
+                      </div>
+                    </div>
+                    <div className="px-6 pt-6 pb-32 animate-fade-in">
+                      <h2 className="font-display text-[26px] font-semibold leading-tight tracking-tight text-foreground">What brings you here?</h2>
+                      <p className="mt-1.5 text-sm text-muted-foreground">Pick anything that resonates. We'll adapt.</p>
+                      <div className="mt-6 flex flex-wrap gap-2">
+                        {[
+                          'Better wellbeing', 'Stress awareness', 'Heart awareness',
+                          'Family protection', 'Pregnancy planning', 'Recovery & post-discharge',
+                          'Executive / travel', 'Mission readiness'
+                        ].map(goal => (
+                          <button
+                            key={goal}
+                            onClick={() => toggleGoal(goal)}
+                            className={`rounded-full border px-4 py-2 text-[13px] transition-smooth ${
+                              selectedGoals.includes(goal) 
+                                ? 'border-transparent bg-gradient-ink text-primary-foreground shadow-soft' 
+                                : 'border-border bg-card text-foreground hover:border-aqua/50'
+                            }`}
+                          >
+                            {selectedGoals.includes(goal) && <Check className="mr-1 inline h-3.5 w-3.5" />}
+                            {goal}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 border-t border-border/60 backdrop-blur-md px-6 py-4" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 90%, transparent)' }}>
+                      <button
+                        onClick={() => setPhoneState('baseline')}
+                        disabled={selectedGoals.length === 0}
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-ink px-6 py-4 font-display text-base font-medium text-primary-foreground shadow-elevated transition-smooth hover:shadow-glow disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Continue
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2.7. BASELINE ONBOARDING SCREEN */}
+                {phoneState === 'baseline' && (
+                  <div className="relative h-full w-full bg-pearl overflow-y-auto no-scrollbar" style={{ backgroundColor: 'var(--pearl)' }}>
+                    <div className="sticky top-0 z-10 flex items-center justify-between px-6 pt-14 pb-3 backdrop-blur-md" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 80%, transparent)' }}>
+                      <div className="flex items-center gap-2">
+                        <ZayraLogo size={32} showText={false} />
+                        <span className="font-display text-lg font-semibold tracking-tight text-foreground">Zayra</span>
+                      </div>
+                      <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground tabular-nums">3 / 4</span>
+                    </div>
+                    <div className="px-1.5">
+                      <div className="h-0.5 w-full rounded-full" style={{ backgroundColor: 'var(--mist)' }}>
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: '75%', backgroundImage: 'linear-gradient(135deg, var(--aqua) 0%, var(--cyan-glow) 100%)' }}></div>
+                      </div>
+                    </div>
+                    <div className="px-6 pt-6 pb-32 animate-fade-in">
+                      <h2 className="font-display text-[26px] font-semibold leading-tight tracking-tight text-foreground">A gentle baseline.</h2>
+                      <p className="mt-1.5 text-sm text-muted-foreground">Alyna will adapt to your body — not an average.</p>
+                      
+                      <div className="mt-8 rounded-3xl border border-border p-6 shadow-soft" style={{ backgroundColor: 'var(--card)' }}>
+                        <div className="flex items-baseline justify-between">
+                          <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Age</span>
+                          <span className="font-display text-3xl font-semibold tabular-nums text-foreground">{age}</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="16" 
+                          max="85" 
+                          value={age}
+                          onChange={(e) => setAge(parseInt(e.target.value))}
+                          className="mt-4 w-full" 
+                          style={{ accentColor: 'var(--aqua)' }}
+                        />
+                        
+                        <div className="mt-6 grid grid-cols-2 gap-3">
+                          {[
+                            { label: 'Lifestyle', val: 'Balanced' },
+                            { label: 'Sleep pattern', val: 'Balanced' },
+                            { label: 'Stress level', val: 'Balanced' },
+                            { label: 'Activity', val: 'Balanced' }
+                          ].map((item, idx) => (
+                            <div key={idx} className="rounded-xl border border-border px-3 py-2.5" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 60%, transparent)' }}>
+                              <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">{item.label}</div>
+                              <div className="text-[13px] font-medium mt-0.5 text-foreground">{item.val}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="absolute bottom-0 left-0 right-0 border-t border-border/60 backdrop-blur-md px-6 py-4" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 90%, transparent)' }}>
+                      <button
+                        onClick={() => setPhoneState('promise')}
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-ink px-6 py-4 font-display text-base font-medium text-primary-foreground shadow-elevated transition-smooth hover:shadow-glow"
+                      >
+                        Continue
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 2.8. PROMISE ONBOARDING SCREEN */}
+                {phoneState === 'promise' && (
+                  <div className="relative h-full w-full bg-pearl overflow-y-auto no-scrollbar" style={{ backgroundColor: 'var(--pearl)' }}>
+                    <div className="sticky top-0 z-10 flex items-center justify-between px-6 pt-14 pb-3 backdrop-blur-md" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 80%, transparent)' }}>
+                      <div className="flex items-center gap-2">
+                        <ZayraLogo size={32} showText={false} />
+                        <span className="font-display text-lg font-semibold tracking-tight text-foreground">Zayra</span>
+                      </div>
+                      <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground tabular-nums">4 / 4</span>
+                    </div>
+                    <div className="px-1.5">
+                      <div className="h-0.5 w-full rounded-full" style={{ backgroundColor: 'var(--mist)' }}>
+                        <div className="h-full rounded-full transition-all duration-500" style={{ width: '100%', backgroundImage: 'linear-gradient(135deg, var(--aqua) 0%, var(--cyan-glow) 100%)' }}></div>
+                      </div>
+                    </div>
+                    <div className="px-6 pt-6 pb-32 animate-fade-in">
+                      <h2 className="font-display text-[26px] font-semibold leading-tight tracking-tight text-foreground">Your body promise.</h2>
+                      <div className="mt-6 space-y-3">
+                        {[
+                          "We'll begin learning your baseline.",
+                          "Alyna will adapt to your body, not an average.",
+                          "Your data stays yours — visible only as you choose.",
+                          "If something matters, we'll quietly tell you why."
+                        ].map((text, i) => (
+                          <div key={i} className="flex items-start gap-3 rounded-2xl border border-border px-4 py-3.5 shadow-soft" style={{ backgroundColor: 'var(--card)' }}>
+                            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full" style={{ backgroundImage: 'linear-gradient(135deg, var(--aqua) 0%, var(--cyan-glow) 100%)' }}>
+                              <Check className="h-3.5 w-3.5 text-white" />
+                            </div>
+                            <p className="text-[14px] leading-relaxed text-foreground">{text}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 border-t border-border/60 backdrop-blur-md px-6 py-4" style={{ backgroundColor: 'color-mix(in oklch, var(--pearl) 90%, transparent)' }}>
+                      <button
+                        onClick={() => setPhoneState('dashboard')}
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-ink px-6 py-4 font-display text-base font-medium text-primary-foreground shadow-elevated transition-smooth hover:shadow-glow"
+                      >
+                        Enter Zayra
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
                 {/* 3. DASHBOARD SCREEN */}
                 {phoneState === 'dashboard' && (
                   <>
