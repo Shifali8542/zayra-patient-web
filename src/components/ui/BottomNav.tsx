@@ -17,17 +17,24 @@ const navItems = [
 
 export function BottomNav({ active, onNavigate }: BottomNavProps) {
   return (
-    <div className="flex items-center justify-around py-2 border-t border-gray-100 bg-white">
-      {navItems.map(({ id, label, Icon }) => (
-        <button
-          key={id}
-          onClick={() => onNavigate(id)}
-          className={`nav-item ${active === id ? 'active' : ''}`}
-        >
-          <Icon size={18} />
-          <span className="text-[9px]">{label}</span>
-        </button>
-      ))}
+    <div className="px-3 pb-3 pt-2 bg-[var(--pearl)] backdrop-blur-md">
+      <div className="flex items-center justify-between rounded-3xl px-2 py-2 shadow-elevated border border-border/60 bg-pearl/80 backdrop-blur-md">
+        {navItems.map(({ id, label, Icon }) => {
+          const isActive = active === id
+          return (
+            <button
+              key={id}
+              onClick={() => onNavigate(id)}
+              className={`flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-1.5 transition-smooth ${isActive ? 'bg-gradient-to-b from-aqua/15 to-transparent' : ''}`}
+            >
+              <Icon className={`h-[18px] w-[18px] transition-smooth ${isActive ? 'text-aqua' : 'text-muted-foreground'}`} />
+              <span className={`text-[10px] font-medium tracking-wide transition-smooth ${isActive ? 'text-ink' : 'text-muted-foreground'}`}>
+                {label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

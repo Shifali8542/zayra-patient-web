@@ -7,7 +7,7 @@ interface ZayraLogoProps {
   className?: string
 }
 
-export function ZayraLogo({ size = 190, showText = true, className = '' }: ZayraLogoProps) {
+export function ZayraLogo({ size = 210, showText = true, className = '' }: ZayraLogoProps) {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       <img

@@ -21,9 +21,11 @@
     --border: oklch(90% .015 225);
     --success: oklch(72% .13 165);
     
-    --gradient-hero: radial-gradient(120% 80% at 50% 0%, oklch(96% .04 200) 0%, var(--pearl) 55%, var(--mist) 100%);
+  --gradient-hero: radial-gradient(120% 80% at 50% 0%, oklch(96% .04 200) 0%, var(--pearl) 55%, var(--mist) 100%);
     --gradient-ink: linear-gradient(135deg, oklch(28% .08 250) 0%, oklch(40% .09 215) 100%);
-    --gradient-pulse: linear-gradient(135deg, #1e2c3e 0%, #447f96 50%, #78c9d2 100%);
+    --gradient-pulse: linear-gradient(135deg, oklch(32% .07 245) 0%, oklch(55% .13 210) 50%, oklch(78% .12 195) 100%);
+    --gradient-care: linear-gradient(160deg, oklch(97% .02 200) 0%, oklch(92% .05 200) 100%);
+    --gradient-aqua: linear-gradient(135deg, var(--aqua) 0%, var(--cyan-glow) 100%);
     
     --shadow-soft: 0 1px 2px oklch(32% .07 245 / .04), 0 8px 24px -12px oklch(32% .07 245 / .1);
     --shadow-elevated: 0 4px 12px -4px oklch(32% .07 245 / .08), 0 24px 48px -24px oklch(32% .07 245 / .18);
@@ -55,6 +57,8 @@
   .bg-gradient-hero { background: var(--gradient-hero); }
   .bg-gradient-ink { background: var(--gradient-ink); }
   .bg-gradient-pulse { background: var(--gradient-pulse); }
+  .bg-gradient-care { background: var(--gradient-care); }
+  .bg-gradient-aqua { background: var(--gradient-aqua); }
   .shadow-soft { box-shadow: var(--shadow-soft); }
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
   .shadow-glow { box-shadow: var(--shadow-glow); }

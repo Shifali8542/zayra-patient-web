@@ -4,6 +4,8 @@ import type { HealthMetric, TimelineEvent, TimelineEventType, PatientSTResult, U
 import { useBLEContext } from '../../contexts/BLEContext'
 import { BLEConnectionButton } from '../../components/ble/BLEConnectionButton'
 import type { WSECGHookResult } from '../../hooks/useECGWebSocket'
+import { CircleDot, ChevronRight, CheckCircle, Stethoscope, CalendarCheck } from 'lucide-react'
+import { ZayraLogo } from '../../components/ui/ZayraLogo'
 
 interface HomeTabProps {
   user: User
@@ -19,16 +21,6 @@ function fmt(val: number | null | undefined): string {
   return String(Math.round(val))
 }
 
-function timelineIconColor(type: TimelineEventType) {
-  switch (type) {
-    case 'observation': return 'bg-zayra-teal/20 text-zayra-teal'
-    case 'confirmation': return 'bg-blue-100 text-blue-500'
-    case 'alert': return 'bg-red-100 text-red-500'
-    case 'insight': return 'bg-purple-100 text-purple-500'
-    default: return 'bg-gray-100 text-gray-500'
-  }
-}
-
 export function HomeTab({ user, metrics, timeline, interpretation, stResult, ecgWS }: HomeTabProps) {
   const greeting = useGreeting()
   const { status: bleStatus } = useBLEContext()
@@ -36,101 +28,135 @@ export function HomeTab({ user, metrics, timeline, interpretation, stResult, ecg
   const firstName = user.first_name?.toLowerCase() || user.name?.toLowerCase() || ''
 
   return (
-    <div className="px-4 pb-4 space-y-4 animate-fade-in">
-
-      {/* Greeting */}
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">{greeting}</p>
-          <h2 className="font-display font-bold text-2xl text-zayra-navy dark:text-white mt-0.5">
-            {firstName}.
-          </h2>
+    <div className="pb-28 animate-fade-in">
+      {/* Header */}
+      <div className="px-6 pt-12 pb-2">
+        <div className="flex items-center justify-between">
+          <ZayraLogo size={28} showText={false} className="animate-heartbeat shadow-soft" />
+          <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground shadow-soft">
+            <CircleDot className="h-2.5 w-2.5 text-success" />
+            {user.journey}
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zayra-mint/60 rounded-full border border-zayra-teal/20">
-          <span className="text-xs font-semibold text-zayra-navy uppercase tracking-wider">{user.journey}</span>
-        </div>
+        <p className="mt-5 text-xs uppercase tracking-[0.22em] text-muted-foreground">{greeting}</p>
+        <h1 className="font-display text-[30px] font-semibold leading-[1.1] tracking-tight text-foreground">{firstName}.</h1>
       </div>
 
-      {/* ST Emergency Alert — only when stemi_suspected = true */}
-      {stResult?.emergency_alert && (
-        <div className="flex items-start gap-2 p-3 rounded-2xl border"
-          style={{ backgroundColor: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)' }}>
-          <span className="text-base">🚨</span>
-          <p className="text-xs font-medium" style={{ color: '#EF4444' }}>
-            {stResult.your_result} — {stResult.what_this_means}
-          </p>
-        </div>
-      )}
-
-      {/* Live Monitor Card */}
-      <div className="card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full animate-pulse ${bleStatus === 'streaming' ? 'bg-zayra-teal' : 'bg-gray-300'}`} />
-            <span className="text-xs font-semibold tracking-widest text-gray-500 uppercase">Axiom — Live</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <BLEConnectionButton />
-            <span className="text-xs font-semibold bg-zayra-teal/10 text-zayra-teal px-2 py-0.5 rounded-full">
-              {bleStatus === 'streaming' ? 'BLE Connected' : metrics?.signalStrength != null ? `Signal ${metrics.signalStrength}%` : 'Signal —'}
-            </span>
-          </div>
-        </div>
-
-        {/* Real AI narrative */}
-        <p className="text-sm font-medium text-zayra-navy dark:text-white mb-3">
-          {interpretation ?? 'Monitoring your ECG data continuously.'}
-        </p>
-
-        <div className="flex items-center justify-around mt-3 pt-3 border-t border-gray-100">
-          {/* Avg HR */}
-          <div className="text-center">
-            <p className="font-display font-bold text-2xl text-zayra-navy dark:text-white">
-              {displayBpm ? fmt(displayBpm) : fmt(metrics?.avgHr)}
-            </p>
-            <p className="text-xs text-gray-400 uppercase tracking-wide">{displayBpm ? 'Live BPM' : 'Avg HR'}</p>
-          </div>
-          <div className="w-px h-8 bg-gray-100" />
-          {/* HRV  */}
-          <div className="text-center">
-            <p className="font-display font-bold text-2xl text-zayra-navy dark:text-white">{fmt(metrics?.hrv_ms)}</p>
-            <p className="text-xs text-gray-400 uppercase tracking-wide">HRV ms</p>
-          </div>
-          <div className="w-px h-8 bg-gray-100" />
-          {/* QRS Width — replaces Anomalies */}
-          <div className="text-center">
-            <p className="font-display font-bold text-2xl text-zayra-navy dark:text-white">{fmt(metrics?.qrs_width_ms)}</p>
-            <p className="text-xs text-gray-400 uppercase tracking-wide">QRS ms</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Alyna Timeline */}
-      <div>
-        <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">Alyna Timeline</p>
-
-        {timeline.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-8 text-center">
-            <span className="text-2xl">🩺</span>
-            <p className="text-xs text-gray-400">No AI insights yet. Run an AI analysis from your ECG tab.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {timeline.map(event => (
-              <div key={event.id} className="flex items-start gap-3 card px-3 py-3">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${timelineIconColor(event.type)}`}>
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-                    <circle cx="6" cy="6" r="4" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zayra-navy dark:text-white leading-snug">{event.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{event.time}</p>
-                </div>
+      {/* Mock Section: Recovery Score */}
+      <div className="px-6 pt-4">
+        <div className="rounded-3xl border border-border bg-gradient-care p-5 shadow-elevated">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Recovery score</p>
+          <div className="mt-3 flex items-center justify-between">
+            <div className="relative" style={{ width: 130, height: 130 }}>
+              <svg width="130" height="130" className="rotate-[-90deg]">
+                <defs>
+                  <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stopColor="oklch(0.32 0.07 245)" />
+                    <stop offset="0.6" stopColor="oklch(0.55 0.13 210)" />
+                    <stop offset="1" stopColor="oklch(0.86 0.10 195)" />
+                  </linearGradient>
+                </defs>
+                <circle cx="65" cy="65" r="53" fill="none" stroke="oklch(0.9 0.015 225)" strokeWidth="10" />
+                <circle cx="65" cy="65" r="53" fill="none" stroke="url(#ring-grad)" strokeWidth="10" strokeLinecap="round" strokeDasharray="333" strokeDashoffset="93" style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.22, 1, 0.36, 1)' }} />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-display text-4xl font-semibold tabular-nums tracking-tight text-foreground">72</span>
+                <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground mt-1">Day 14 / 30</span>
               </div>
-            ))}
+            </div>
+            <div className="flex-1 pl-5">
+              <p className="font-display text-[16px] leading-snug font-medium text-balance text-foreground">Steady recovery. Dr. Iyer reviewed your trace this morning.</p>
+              <button className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-aqua">
+                Open care plan <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* Mock Section: Today's Care Plan */}
+      <div className="px-6 pt-5">
+        <h3 className="mb-2.5 mt-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Today's care plan</h3>
+        <div className="rounded-2xl border border-border bg-card p-2 shadow-soft">
+          {[
+            { label: 'Morning meds — Ramipril 5mg', done: true },
+            { label: 'Walk 15 min — light pace', done: true },
+            { label: 'Symptom log — chest, breath, energy', done: false },
+            { label: 'Evening BP reading', done: false },
+          ].map((task, i) => (
+            <div key={i} className="flex items-center gap-3 px-3 py-3 border-b last:border-0 border-border/60">
+              {task.done ? (
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border bg-gradient-aqua border-transparent">
+                  <CheckCircle className="h-3.5 w-3.5 text-white" />
+                </div>
+              ) : (
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card" />
+              )}
+              <p className={`text-[14px] flex-1 ${task.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                {task.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Mock Section: Your Care Team */}
+      <div className="px-6 pt-5">
+        <h3 className="mb-2.5 mt-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Your care team</h3>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
+            <Stethoscope className="h-4 w-4 text-aqua" />
+            <p className="mt-2 text-[14px] font-medium text-foreground">Dr. Anjali Iyer</p>
+            <p className="text-xs text-muted-foreground">Cardiology · Reviews daily</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-soft">
+            <CalendarCheck className="h-4 w-4 text-aqua" />
+            <p className="mt-2 text-[14px] font-medium text-foreground">Follow-up</p>
+            <p className="text-xs text-muted-foreground">Tue, 14 May · 11:00</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Preserved Live Monitor (Data Backend Intact & Required for BLE functionality) */}
+      <div className="px-6 pt-5">
+        <h3 className="mb-2.5 mt-1 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Live Monitor</h3>
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-elevated">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full animate-pulse ${bleStatus === 'streaming' ? 'bg-aqua' : 'bg-muted'}`} />
+              <span className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">Axiom — Live</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <BLEConnectionButton />
+              <span className="text-[10px] font-semibold bg-aqua/10 text-aqua px-2 py-0.5 rounded-full">
+                {bleStatus === 'streaming' ? 'BLE Connected' : metrics?.signalStrength != null ? `Signal ${metrics.signalStrength}%` : 'Signal —'}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-sm font-medium text-foreground mb-4">
+            {interpretation ?? 'Monitoring your ECG data continuously.'}
+          </p>
+
+          <div className="flex items-center justify-around mt-4 pt-4 border-t border-border/60">
+            <div className="text-center">
+              <p className="font-display font-bold text-2xl text-foreground">
+                {displayBpm ? fmt(displayBpm) : fmt(metrics?.avgHr)}
+              </p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{displayBpm ? 'Live BPM' : 'Avg HR'}</p>
+            </div>
+            <div className="w-px h-8 bg-border" />
+            <div className="text-center">
+              <p className="font-display font-bold text-2xl text-foreground">{fmt(metrics?.hrv_ms)}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">HRV ms</p>
+            </div>
+            <div className="w-px h-8 bg-border" />
+            <div className="text-center">
+              <p className="font-display font-bold text-2xl text-foreground">{fmt(metrics?.qrs_width_ms)}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wide">QRS ms</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

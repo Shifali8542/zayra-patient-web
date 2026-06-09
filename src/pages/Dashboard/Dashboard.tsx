@@ -538,21 +538,14 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                 {/* 3. DASHBOARD SCREEN */}
                 {phoneState === 'dashboard' && (
                   <>
-                    <div className="flex items-center justify-between px-5 pt-12 pb-3 border-b border-border z-10 bg-[var(--pearl)] flex-shrink-0">
-                      <ZayraLogo size={32} />
-                      <div className="w-7" />
-                    </div>
-
                     <div className="relative flex-1 w-full overflow-y-auto no-scrollbar">
                       {dashboard.loading ? (
-                        <div className="flex flex-col items-center justify-center h-40 gap-3">
+                        <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3">
                           <div className="w-8 h-8 border-2 border-aqua/30 border-t-aqua rounded-full animate-spin" />
                           <p className="text-xs text-muted-foreground">Loading your health data…</p>
                         </div>
                       ) : (
-                        <div className="pt-3 pb-8">
-                          {renderTab()}
-                        </div>
+                        renderTab()
                       )}
                     </div>
 
