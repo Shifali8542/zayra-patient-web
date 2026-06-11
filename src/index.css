@@ -57,9 +57,12 @@
   .bg-gradient-hero { background: var(--gradient-hero); }
   .bg-pearl { background-color: var(--pearl); }
   .bg-mist { background-color: var(--mist); }
+.from-mist\/40 { --tw-gradient-from: oklch(94.5% .012 225 / .40); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, oklch(94.5% .012 225 / 0)); }
+.text-ink { color: var(--ink); }
   .bg-gradient-ink { background: var(--gradient-ink); }
   .bg-gradient-pulse { background: var(--gradient-pulse); }
   .bg-gradient-care { background: var(--gradient-care); }
+  .bg-gradient-evac { background: linear-gradient(160deg, oklch(22% .07 245) 0%, oklch(28% .09 230) 100%); }
   .bg-gradient-aqua { background: var(--gradient-aqua); }
   .shadow-soft { box-shadow: var(--shadow-soft); }
   .shadow-elevated { box-shadow: var(--shadow-elevated); }
