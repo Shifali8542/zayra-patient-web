@@ -55,6 +55,8 @@
 
 @layer utilities {
   .bg-gradient-hero { background: var(--gradient-hero); }
+  .bg-pearl { background-color: var(--pearl); }
+  .bg-mist { background-color: var(--mist); }
   .bg-gradient-ink { background: var(--gradient-ink); }
   .bg-gradient-pulse { background: var(--gradient-pulse); }
   .bg-gradient-care { background: var(--gradient-care); }
@@ -66,11 +68,22 @@
   .text-balance { text-wrap: balance; }
   .text-aqua { color: var(--aqua); }
   .bg-aqua { background-color: var(--aqua); }
-  .bg-cyan-glow { background-color: var(--cyan-glow); }
+.bg-cyan-glow { background-color: var(--cyan-glow); }
+.bg-aqua\/20 { background-color: oklch(74% .12 200 / .20); }
+.to-mist { --tw-gradient-to: oklch(94.5% .012 225); }
+.from-white { --tw-gradient-from: #fff; }
+.from-foreground { --tw-gradient-from: oklch(22% .05 245); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, oklch(22% .05 245 / 0)); }
+.to-primary { --tw-gradient-to: oklch(32% .07 245); }
+.bg-primary { background-color: var(--primary); }
+.bg-aqua\/30 { background-color: oklch(74% .12 200 / .30); }
+.bg-cyan-glow\/30 { background-color: oklch(86% .1 195 / .30); }
+.bg-cyan-glow\/40 { background-color: oklch(86% .1 195 / .40); }
   .text-muted-foreground { color: var(--muted-foreground); }
   .text-foreground { color: var(--foreground); }
   .bg-card { background-color: var(--card); }
+  .bg-card\/40 { background-color: oklch(100% 0 0 / .40); }
   .border-border { border-color: var(--border); }
+  .border-border\/60 { border-color: oklch(90% .015 225 / .60); }
   .bg-success { background-color: var(--success); }
   .text-primary-foreground { color: var(--primary-foreground); }
   

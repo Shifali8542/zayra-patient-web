@@ -1,6 +1,7 @@
 import React from 'react'
 import { Moon, Sun } from 'lucide-react'
 import { ZayraLogo } from '../ui/ZayraLogo'
+import iconPng from '../../assets/icon.png'
 import { useTheme } from '../../contexts/ThemeContext'
 
 interface NavbarProps {
@@ -10,9 +11,16 @@ interface NavbarProps {
 export function Navbar({ onRequestAccess }: NavbarProps) {
   const { theme, toggleTheme } = useTheme()
 
- return (
+  return (
     <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
-      <ZayraLogo size={32} />
+     <div className="flex items-center gap-2">
+        <img
+          src={iconPng}
+          alt="Zayra"
+          className="rounded-2xl object-cover shadow-soft h-8 w-8"
+        />
+        <span className="font-display text-lg font-semibold tracking-tight">Zayra</span>
+      </div>
 
       <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
         {['Wellness', 'Care', 'Evac', 'Hospital'].map(item => (

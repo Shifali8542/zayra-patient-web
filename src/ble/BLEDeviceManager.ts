@@ -96,7 +96,6 @@ export class BLEDeviceManager {
     }
 
     // Forget device on manual disconnect
-    // Forces Chrome to show fresh scan list on next connect
     if (this.device && typeof (this.device as any).forget === 'function') {
       try { await (this.device as any).forget() } catch { /* ignore */ }
     }

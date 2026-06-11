@@ -32,7 +32,7 @@ export function HomeTab({ user, metrics, timeline, interpretation, stResult, ecg
       {/* Header */}
       <div className="px-6 pt-12 pb-2">
         <div className="flex items-center justify-between">
-          <ZayraLogo size={28} showText={false} className="animate-heartbeat shadow-soft" />
+          <ZayraLogo size={36} showText={false} variant="icon" imgClassName="animate-heartbeat shadow-soft rounded-full" />
           <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[10.5px] uppercase tracking-[0.18em] text-muted-foreground shadow-soft">
             <CircleDot className="h-2.5 w-2.5 text-success" />
             {user.journey}
