@@ -55,10 +55,12 @@
 
 @layer utilities {
   .bg-gradient-hero { background: var(--gradient-hero); }
-  .bg-pearl { background-color: var(--pearl); }
+ .bg-pearl { background-color: var(--pearl); }
+.to-pearl { --tw-gradient-to: oklch(98.5% .004 220); }
   .bg-mist { background-color: var(--mist); }
 .from-mist\/40 { --tw-gradient-from: oklch(94.5% .012 225 / .40); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, oklch(94.5% .012 225 / 0)); }
 .text-ink { color: var(--ink); }
+.text-ink\/70 { color: oklch(32% .07 245 / .70); }
   .bg-gradient-ink { background: var(--gradient-ink); }
   .bg-gradient-pulse { background: var(--gradient-pulse); }
   .bg-gradient-care { background: var(--gradient-care); }
@@ -86,6 +88,17 @@
   .text-foreground { color: var(--foreground); }
   .bg-card { background-color: var(--card); }
   .bg-card\/40 { background-color: oklch(100% 0 0 / .40); }
+  .glass { background: oklch(100% 0 0 / .72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .glass-dark { background: oklch(22% .07 245 / .60); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .bg-white\/5 { background-color: oklch(100% 0 0 / .05); }
+  .bg-pearl\/80 { background-color: oklch(98.5% .004 220 / .80); }
+  .from-aqua\/15 { --tw-gradient-from: oklch(74% .12 200 / .15); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, oklch(74% .12 200 / 0)); }
+.from-aqua\/40 { --tw-gradient-from: oklch(74% .12 200 / .40); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, oklch(74% .12 200 / 0)); }
+.from-cyan-glow\/40 { --tw-gradient-from: oklch(86% .1 195 / .40); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, oklch(86% .1 195 / 0)); }
+.from-ink\/90 { --tw-gradient-from: oklch(32% .07 245 / .90); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, oklch(32% .07 245 / 0)); }
+.to-aqua\/40 { --tw-gradient-to: oklch(74% .12 200 / .40); }
+.to-cyan-glow\/30 { --tw-gradient-to: oklch(86% .1 195 / .30); }
+.to-mist { --tw-gradient-to: oklch(94.5% .012 225); }
   .border-border { border-color: var(--border); }
   .border-border\/60 { border-color: oklch(90% .015 225 / .60); }
   .bg-success { background-color: var(--success); }

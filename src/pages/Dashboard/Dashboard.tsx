@@ -29,7 +29,8 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [activeTab, setActiveTab] = useState('home')
   const [openTicketId, setOpenTicketId] = useState<number | null>(null)
   const [phoneState, setPhoneState] = useState<PhoneState>('landing')
-const [selectedJourney, setSelectedJourney] = useState<'wellness' | 'care' | 'evac' | 'hospital' | null>(null)
+  const [selectedJourney, setSelectedJourney] = useState<'wellness' | 'care' | 'evac' | 'hospital' | null>(null)
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null)
   const [onboardingName, setOnboardingName] = useState('')
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [age, setAge] = useState(32)
@@ -55,6 +56,8 @@ const [selectedJourney, setSelectedJourney] = useState<'wellness' | 'care' | 'ev
       ecgWS.start(1)
     }
   }, [ecgWS.status])
+
+  const isEvacJourney = (selectedJourney ?? user.journey) === 'evac'
 
   const renderTab = () => {
     if (dashboard.loading && !dashboard.patientMe) return null
@@ -117,16 +120,17 @@ const [selectedJourney, setSelectedJourney] = useState<'wellness' | 'care' | 'ev
             riskLevel={dashboard.riskLevel}
             findings={dashboard.findings}
             recommendation={dashboard.recommendation}
+            isDark={isEvacJourney}
           />
         )
       case 'circle':
-        return <CircleTab members={dashboard.members} journeys={dashboard.journeys} user={user} />
+        return <CircleTab members={dashboard.members} journeys={dashboard.journeys} user={user} isDark={isEvacJourney} />
       case 'rhythm':
         return dashboard.streak
-          ? <RhythmTab streak={dashboard.streak} consistencyAreas={dashboard.consistencyAreas} clinicalInfo={dashboard.clinicalInfo} />
+          ? <RhythmTab streak={dashboard.streak} consistencyAreas={dashboard.consistencyAreas} clinicalInfo={dashboard.clinicalInfo} isDark={isEvacJourney} />
           : null
       case 'stories':
-        return <StoriesTab stories={dashboard.stories} />
+        return <StoriesTab stories={dashboard.stories} isDark={isEvacJourney} />
       case 'support':
         if (openTicketId !== null) {
           return (
@@ -147,6 +151,7 @@ const [selectedJourney, setSelectedJourney] = useState<'wellness' | 'care' | 'ev
             onLogout={onLogout}
             clinicalInfo={dashboard.clinicalInfo}
             onNavigateSupport={() => setActiveTab('support')}
+            isDark={isEvacJourney}
           />
         )
       default:
@@ -534,7 +539,7 @@ const [selectedJourney, setSelectedJourney] = useState<'wellness' | 'care' | 'ev
                  {/* 3. DASHBOARD SCREEN */}
                   {phoneState === 'dashboard' && (
                     <div className="flex flex-col h-full w-full">
-                      <div className="flex-1 overflow-y-auto no-scrollbar min-h-0">
+                      <div id="phone-scroll-container" ref={scrollContainerRef} className="flex-1 overflow-y-auto no-scrollbar min-h-0">
                         {dashboard.loading ? (
                           <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3">
                             <div className="w-8 h-8 border-2 border-aqua/30 border-t-aqua rounded-full animate-spin" />
@@ -545,21 +550,16 @@ const [selectedJourney, setSelectedJourney] = useState<'wellness' | 'care' | 'ev
                         )}
                       </div>
 
-                      {(() => {
-                        const isEvacJourney = (selectedJourney ?? user.journey) === 'evac'
-                        return (
-                          <div className={`flex-shrink-0 z-40 border-t ${isEvacJourney ? 'border-white/10 bg-transparent' : 'border-border bg-[var(--pearl)]'}`}>
-                            <BottomNav
-                              active={activeTab}
-                              dark={isEvacJourney}
-                              onNavigate={(tab) => {
-                                if (tab !== 'support') setOpenTicketId(null)
-                                setActiveTab(tab)
-                              }}
-                            />
-                          </div>
-                        )
-                      })()}
+                      <div className={`flex-shrink-0 z-40 border-t ${isEvacJourney ? 'border-white/10 bg-transparent' : 'border-border bg-[var(--pearl)]'}`}>
+                       <BottomNav
+                          active={activeTab}
+                          dark={isEvacJourney}
+                          onNavigate={(tab) => {
+                            setOpenTicketId(null)
+                            setActiveTab(tab)
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>

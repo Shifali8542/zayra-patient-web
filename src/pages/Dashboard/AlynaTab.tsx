@@ -1,8 +1,3 @@
-// =============================================================================
-// src/pages/Dashboard/AlynaTab.tsx
-// Real AI data from backend. Sending a message triggers refresh=true Orinn call.
-// =============================================================================
-
 import React, { useState, useRef, useEffect } from 'react'
 import { Mic, Send, Sparkles } from 'lucide-react'
 import type { ChatMessage } from '../../types'
@@ -15,11 +10,13 @@ interface AlynaTabProps {
   riskLevel: string | null
   findings: string[]
   recommendation: string | null
+  isDark?: boolean
 }
 
 export function AlynaTab({
   initialChat, onSendMessage,
   interpretation, riskLevel, findings, recommendation,
+  isDark = false,
 }: AlynaTabProps) {
   // Hardcoded mock data to perfectly match the requested design reference
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -32,7 +29,10 @@ export function AlynaTab({
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const container = document.getElementById('phone-scroll-container')
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+    }
   }, [messages])
 
   const send = async () => {
@@ -52,7 +52,7 @@ export function AlynaTab({
   }
 
  return (
-    <div className="relative min-h-full w-full animate-fade-in flex flex-col">
+    <div className={`relative min-h-full w-full animate-fade-in flex flex-col ${isDark ? 'bg-gradient-evac text-primary-foreground' : 'bg-gradient-hero'}`}>
       <div className="flex-1 pb-8">
         {/* Header */}
         <div className="px-6 pt-12 pb-2">

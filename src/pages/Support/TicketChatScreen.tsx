@@ -169,7 +169,10 @@ export function TicketChatScreen({ ticketId, accessToken, onBack }: TicketChatSc
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const container = document.getElementById('phone-scroll-container')
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })
+    }
   }, [messages])
 
   const handleSend = async () => {
