@@ -23,10 +23,13 @@ interface DashboardPageProps {
   onLogout: () => Promise<void>
 }
 
+type PhoneState = 'landing' | 'journey' | 'name' | 'goals' | 'baseline' | 'promise' | 'dashboard'
+
 export function DashboardPage({ user, onLogout }: DashboardPageProps) {
   const [activeTab, setActiveTab] = useState('home')
   const [openTicketId, setOpenTicketId] = useState<number | null>(null)
-  const [phoneState, setPhoneState] = useState<'landing' | 'journey' | 'name' | 'goals' | 'baseline' | 'promise' | 'dashboard'>('landing')
+  const [phoneState, setPhoneState] = useState<PhoneState>('landing')
+const [selectedJourney, setSelectedJourney] = useState<'wellness' | 'care' | 'evac' | 'hospital' | null>(null)
   const [onboardingName, setOnboardingName] = useState('')
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
   const [age, setAge] = useState(32)
@@ -97,7 +100,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
       case 'home':
         return (
           <HomeTab
-            user={user}
+            user={{ ...user, journey: selectedJourney ?? user.journey }}
             metrics={dashboard.metrics}
             timeline={dashboard.timeline}
             interpretation={dashboard.interpretation}
@@ -215,7 +218,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                 {/* Notch */}
                 <div className="absolute left-1/2 top-3 z-50 h-7 w-28 -translate-x-1/2 rounded-full bg-black/90" />
 
-                <div className="relative h-full w-full overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+                <div className="relative h-full w-full flex flex-col overflow-hidden" style={{ scrollbarWidth: 'none' }}>
                   {/* 1. LANDING SCREEN */}
                   {phoneState === 'landing' && (
                     <div className="relative h-full w-full">
@@ -267,7 +270,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                         <p className="mt-2 text-sm text-muted-foreground text-balance">The app adapts its tone, navigation and intelligence to who you are.</p>
                       </div>
                       <div className="px-6 pb-10 space-y-3">
-                        <button onClick={() => setPhoneState('name')} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-cyan-glow/40 to-aqua/20" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--cyan-glow) 40%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--aqua) 20%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
+                        <button onClick={() => { setSelectedJourney('wellness'); setPhoneState('name') }} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-cyan-glow/40 to-aqua/20" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--cyan-glow) 40%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--aqua) 20%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
                           <div className="flex items-start gap-4">
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-soft">
                               <Heart className="h-6 w-6 text-ink" />
@@ -282,7 +285,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                             </div>
                           </div>
                         </button>
-                        <button onClick={() => setPhoneState('name')} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-aqua/30 to-ink/10" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--aqua) 30%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--ink) 10%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
+                        <button onClick={() => { setSelectedJourney('care'); setPhoneState('name') }} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-aqua/30 to-ink/10" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--aqua) 30%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--ink) 10%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
                           <div className="flex items-start gap-4">
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-soft">
                               <Activity className="h-6 w-6 text-ink" />
@@ -297,7 +300,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                             </div>
                           </div>
                         </button>
-                        <button onClick={() => setPhoneState('name')} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-ink/90 to-ink/70 text-primary-foreground" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--ink) 90%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--ink) 70%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
+                        <button onClick={() => { setSelectedJourney('evac'); setPhoneState('name') }} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-ink/90 to-ink/70 text-primary-foreground" style={{ '--tw-gradient-from': 'color-mix(in oklch, var(--ink) 90%, transparent)', '--tw-gradient-to': 'color-mix(in oklch, var(--ink) 70%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
                           <div className="flex items-start gap-4">
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
                               <ShieldCheck className="h-6 w-6 text-cyan-glow" />
@@ -312,7 +315,7 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                             </div>
                           </div>
                         </button>
-                        <button onClick={() => setPhoneState('name')} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-mist to-cyan-glow/30" style={{ '--tw-gradient-from': 'var(--mist)', '--tw-gradient-to': 'color-mix(in oklch, var(--cyan-glow) 30%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
+                        <button onClick={() => { setSelectedJourney('hospital'); setPhoneState('name') }} className="group relative w-full overflow-hidden rounded-3xl border border-border/60 p-5 text-left transition-smooth bg-gradient-to-br shadow-soft hover:shadow-elevated hover:-translate-y-0.5 from-mist to-cyan-glow/30" style={{ '--tw-gradient-from': 'var(--mist)', '--tw-gradient-to': 'color-mix(in oklch, var(--cyan-glow) 30%, transparent)', '--tw-gradient-stops': 'var(--tw-gradient-from), var(--tw-gradient-to)' } as React.CSSProperties}>
                           <div className="flex items-start gap-4">
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-soft">
                               <Stethoscope className="h-6 w-6 text-ink" />
@@ -528,10 +531,10 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                     </div>
                   )}
 
-                  {/* 3. DASHBOARD SCREEN */}
+                 {/* 3. DASHBOARD SCREEN */}
                   {phoneState === 'dashboard' && (
-                    <>
-                      <div className="relative flex-1 w-full overflow-y-auto no-scrollbar">
+                    <div className="flex flex-col h-full w-full">
+                      <div className="flex-1 overflow-y-auto no-scrollbar min-h-0">
                         {dashboard.loading ? (
                           <div className="flex flex-col items-center justify-center h-full min-h-[200px] gap-3">
                             <div className="w-8 h-8 border-2 border-aqua/30 border-t-aqua rounded-full animate-spin" />
@@ -542,16 +545,22 @@ export function DashboardPage({ user, onLogout }: DashboardPageProps) {
                         )}
                       </div>
 
-                      <div className="z-10 bg-[var(--pearl)] border-t border-border flex-shrink-0">
-                        <BottomNav
-                          active={activeTab}
-                          onNavigate={(tab) => {
-                            if (tab !== 'support') setOpenTicketId(null)
-                            setActiveTab(tab)
-                          }}
-                        />
-                      </div>
-                    </>
+                      {(() => {
+                        const isEvacJourney = (selectedJourney ?? user.journey) === 'evac'
+                        return (
+                          <div className={`flex-shrink-0 z-40 border-t ${isEvacJourney ? 'border-white/10 bg-transparent' : 'border-border bg-[var(--pearl)]'}`}>
+                            <BottomNav
+                              active={activeTab}
+                              dark={isEvacJourney}
+                              onNavigate={(tab) => {
+                                if (tab !== 'support') setOpenTicketId(null)
+                                setActiveTab(tab)
+                              }}
+                            />
+                          </div>
+                        )
+                      })()}
+                    </div>
                   )}
                 </div>
               </div>

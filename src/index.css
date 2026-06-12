@@ -72,6 +72,7 @@
   .text-aqua { color: var(--aqua); }
   .bg-aqua { background-color: var(--aqua); }
 .bg-cyan-glow { background-color: var(--cyan-glow); }
+  .text-cyan-glow { color: var(--cyan-glow); }
 .bg-aqua\/20 { background-color: oklch(74% .12 200 / .20); }
 .to-mist { --tw-gradient-to: oklch(94.5% .012 225); }
 .from-white { --tw-gradient-from: #fff; }
